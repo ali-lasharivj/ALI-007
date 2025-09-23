@@ -4,7 +4,7 @@
   "version": "3.0.0",
   "description": "ALI-MD, a Multi Device Whatsapp Bot to Enhance Whatsapp Communication Experience",
   "main": "./index.js",
-  "type": "commonjs",
+  "type": "module",
   "engines": {
     "node": ">=20.0.0"
   },
