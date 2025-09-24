@@ -457,6 +457,19 @@ if (isGroup && !isAdmins && isBotAdmins) {
         if (!global.userWarnings) global.userWarnings = {};
         let userWarnings = global.userWarnings;
         if (config.ANTILINK === "true") {
+              let gift = {
+            key: {
+                fromMe: false,
+                participant: `0@s.whatsapp.net`,
+                remoteJid: "status@broadcast"
+            },
+            message: {
+                contactMessage: {
+                    displayName: `© 𝙰𝙻𝙸-𝙼𝙳 𝙱𝙾𝚃`,
+                    vcard: `BEGIN:VCARD\nVERSION:3.0\nN:;a,;;;\nFN:'GIFTED'\nitem1.TEL;waid=${m.sender.split("@")[0]}:${m.sender.split("@")[0]}\nitem1.X-ABLabel:Ponsel\nEND:VCARD`
+                }
+            }
+        };
             await Aliconn.sendMessage(from, { delete: mek.key });
             await Aliconn.sendMessage(from, {
                 text: `*⌈⚠️ ℓιɴк ∂єтє¢тє∂ ⌋*
@@ -466,7 +479,7 @@ if (isGroup && !isAdmins && isBotAdmins) {
 *│📑 ʀєαѕσɴ: ℓιикѕ ɴσт αℓℓσωє∂*
 *╰────────────────┄┈┈*`,
                 mentions: [sender]
-            }, { quoted: mek });
+            }, { quoted: gift });
             await Aliconn.groupParticipantsUpdate(from, [sender], 'remove');
             return;
         } else if (config.ANTILINK === "warn") {
@@ -478,7 +491,7 @@ if (isGroup && !isAdmins && isBotAdmins) {
             },
             message: {
                 contactMessage: {
-                    displayName: `𓂃ᷱ᪳𝐀ɭīī-𝐌𝐃 𝐁❍𝐓^᪲᪲᪲`,
+                    displayName: `© 𝙰𝙻𝙸-𝙼𝙳 𝙱𝙾𝚃`,
                     vcard: `BEGIN:VCARD\nVERSION:3.0\nN:;a,;;;\nFN:'GIFTED'\nitem1.TEL;waid=${m.sender.split("@")[0]}:${m.sender.split("@")[0]}\nitem1.X-ABLabel:Ponsel\nEND:VCARD`
                 }
             }
@@ -488,7 +501,7 @@ if (isGroup && !isAdmins && isBotAdmins) {
             if (userWarnings[sender] <= 2) {
                 await Aliconn.sendMessage(from, { delete: mek.key });
                 await Aliconn.sendMessage(from, {
-                    text: `*⌈🔗 ℓιɴк ∂єтє¢тє∂ ⌋*
+                    text: `*⌈⚠️ ℓιɴк ∂єтє¢тє∂ ⌋*
 *╭────────────────┄┈*
 *│👤 ᴜsєʀ:* @${sender.split('@')[0]}!
 *│⭕ ᴄσᴜɴᴛ : ${userWarnings[sender]}*
