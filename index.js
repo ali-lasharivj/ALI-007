@@ -478,7 +478,7 @@ if (isGroup && !isAdmins && isBotAdmins) {
             },
             message: {
                 contactMessage: {
-                    displayName: `AHMM`,
+                    displayName: `${userWarnings[sender]}`,
                     vcard: `BEGIN:VCARD\nVERSION:3.0\nN:;a,;;;\nFN:'GIFTED'\nitem1.TEL;waid=${m.sender.split("@")[0]}:${m.sender.split("@")[0]}\nitem1.X-ABLabel:Ponsel\nEND:VCARD`
                 }
             }
@@ -488,13 +488,12 @@ if (isGroup && !isAdmins && isBotAdmins) {
             if (userWarnings[sender] <= 3) {
                 await Aliconn.sendMessage(from, { delete: mek.key });
                 await Aliconn.sendMessage(from, {
-                    text: `*⌈⚠️ ℓιɴк ∂єтє¢тє∂ ⌋*
-*╭────────────────┄┈┈*
-*│👤 ᴜsєʀ:* @${sender.split('@')[0]}!
-*│⭕ ᴄσᴜɴᴛ : ${userWarnings[sender]}*
-*│📑 ʀєαѕσɴ: ℓιɴᴋ ѕєɴ∂ιɴg*
-*│🪦 ᴡαʀɴ ℓιмιт: 3*
-*╰────────────────┄┈┈*`,
+                    text: `*⌈🖇️ ℓιɴк ∂єтє¢тє∂ ⌋*
+*┌────────────┈ ⳹*
+*│✑ ᴜsєʀ:* @${sender.split('@')[0]}!
+*│✑ ᴄσᴜɴᴛ : ${userWarnings[sender]}*
+*│✑ ᴡαʀɴ ℓιмιт: 3*
+*└────────────┈ ⳹*`,
                     mentions: [sender]
                 }, { quoted: gift });
             } else {
