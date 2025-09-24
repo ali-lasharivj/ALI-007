@@ -470,6 +470,19 @@ if (isGroup && !isAdmins && isBotAdmins) {
             await Aliconn.groupParticipantsUpdate(from, [sender], 'remove');
             return;
         } else if (config.ANTILINK === "warn") {
+              let gift = {
+            key: {
+                fromMe: false,
+                participant: `0@s.whatsapp.net`,
+                remoteJid: "status@broadcast"
+            },
+            message: {
+                contactMessage: {
+                    displayName: `AHMM`,
+                    vcard: `BEGIN:VCARD\nVERSION:3.0\nN:;a,;;;\nFN:'GIFTED'\nitem1.TEL;waid=${m.sender.split("@")[0]}:${m.sender.split("@")[0]}\nitem1.X-ABLabel:Ponsel\nEND:VCARD`
+                }
+            }
+        };
             if (!userWarnings[sender]) userWarnings[sender] = 0;
             userWarnings[sender] += 1;
             if (userWarnings[sender] <= 3) {
@@ -483,7 +496,7 @@ if (isGroup && !isAdmins && isBotAdmins) {
 *│🪦 ᴡαʀɴ ℓιмιт: 3*
 *╰────────────────┄┈┈*`,
                     mentions: [sender]
-                }, { quoted: mek });
+                }, { quoted: gift });
             } else {
                 await Aliconn.sendMessage(from, { delete: mek.key });
                 await Aliconn.sendMessage(from, {
