@@ -478,22 +478,22 @@ if (isGroup && !isAdmins && isBotAdmins) {
             },
             message: {
                 contactMessage: {
-                    displayName: `${userWarnings[sender]}`,
+                    displayName: `𓂃ᷱ᪳𝐀ɭīī-𝐌𝐃 𝐁❍𝐓^᪲᪲᪲`,
                     vcard: `BEGIN:VCARD\nVERSION:3.0\nN:;a,;;;\nFN:'GIFTED'\nitem1.TEL;waid=${m.sender.split("@")[0]}:${m.sender.split("@")[0]}\nitem1.X-ABLabel:Ponsel\nEND:VCARD`
                 }
             }
         };
             if (!userWarnings[sender]) userWarnings[sender] = 0;
             userWarnings[sender] += 1;
-            if (userWarnings[sender] <= 3) {
+            if (userWarnings[sender] <= 2) {
                 await Aliconn.sendMessage(from, { delete: mek.key });
                 await Aliconn.sendMessage(from, {
-                    text: `*⌈🖇️ ℓιɴк ∂єтє¢тє∂ ⌋*
-*┌────────────┈ ⳹*
-*│✑ ᴜsєʀ:* @${sender.split('@')[0]}!
-*│✑ ᴄσᴜɴᴛ : ${userWarnings[sender]}*
-*│✑ ᴡαʀɴ ℓιмιт: 3*
-*└────────────┈ ⳹*`,
+                    text: `*⌈🔗 ℓιɴк ∂єтє¢тє∂ ⌋*
+*╭────────────────┄┈*
+*│👤 ᴜsєʀ:* @${sender.split('@')[0]}!
+*│⭕ ᴄσᴜɴᴛ : ${userWarnings[sender]}*
+*│🪦 ᴡαʀɴ ℓιмιт: 3*
+*╰────────────────┄┈*`,
                     mentions: [sender]
                 }, { quoted: gift });
             } else {
