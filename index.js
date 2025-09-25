@@ -80,7 +80,6 @@ const {
       fetchJson,
       emojis,
       commands,
-      doReact,
       giftedmd,
       eventlogger, 
       loadSession,
@@ -128,7 +127,7 @@ function formatBytes(bytes) {
 async function ConnectAliconnToWA() {
   await loadSession();
   eventlogger()
-console.log('⏱️ CONNETING ALI MD ⏱️');
+console.log('CONNETING ALI MD [⏱️]');
 const { state, saveCreds } = await useMultiFileAuthState(__dirname + '/session/');
 var { version, isLatest } = await fetchLatestBaileysVersion();
 
@@ -149,42 +148,42 @@ const Aliconn = Alisock({
    Aliconn.ev.on("connection.update", async ({ connection, lastDisconnect }) => {
     if (connection === 'close') {
      const statusCode = lastDisconnect?.error?.output?.statusCode || 0;
-    console.log(`🛑 connection closed with status code: ${statusCode}`);
+    console.log(`[🛑] connection closed with status code: ${statusCode}`);
       switch (statusCode) {
       case DisconnectReason.badSession:
-        console.log("❌ Bad Session File. Delete session and rescan QR.");
+        console.log("[❌] Bad Session File. Delete session and rescan QR.");
         break;
       case DisconnectReason.connectionClosed:
-        console.log("⚠️ Connection closed. Reconnecting...");
+        console.log("[⚠️] Connection closed. Reconnecting...");
         await sleep(3000);
       ConnectAliconnToWA();
         break;
       case DisconnectReason.connectionLost:
-        console.log("⚠️ Connection lost. Trying to reconnect...");
+        console.log("[⚠️] Connection lost. Trying to reconnect...");
         await sleep(3000);
        ConnectAliconnToWA();
         break;
       case DisconnectReason.connectionReplaced:
-        console.log("⚠️ Connection replaced by a new session. You might be logged in elsewhere.");
+        console.log("[⚠️] Connection replaced by a new session. You might be logged in elsewhere.");
         break;
       case DisconnectReason.loggedOut:
-        console.log("🛑 Logged out. Delete session and rescan QR.");
+        console.log("[🛑] Logged out. Delete session and rescan QR.");
         break;
       case DisconnectReason.restartRequired:
-        console.log("🔁 Restart required. Reconnecting...");
+        console.log("[🔁] Restart required. Reconnecting...");
         await sleep(3000);
        ConnectAliconnToWA();
         break;
       case DisconnectReason.timedOut:
-        console.log("⏱️ Connection timed out. Trying to reconnect...");
+        console.log("[⏱️] Connection timed out. Trying to reconnect...");
         await sleep(3000);
        ConnectAliconnToWA();
         break;
       case DisconnectReason.multideviceMismatch:
-        console.log("❌ Multi-device mismatch. Please re-login.");
+        console.log("[❌] Multi-device mismatch. Please re-login.");
         break;
       default:
-        console.log(`❌ Unknown disconnect reason: ${statusCode}. Reconnecting...`);
+        console.log(`[❌] Unknown disconnect reason: ${statusCode}. Reconnecting...`);
         await sleep(3000);
        ConnectAliconnToWA();     
     }
@@ -194,7 +193,7 @@ if (path.extname(plugin).toLowerCase() == ".js") {
 require("./plugins/" + plugin); 
 }
 });
-console.log('PLUGINS SYNCED ✅');
+console.log('PLUGINS SYNCED [🌀]');
 const totalCommands = commands.filter((command) => command.pattern).length;
 const startMess = {
         image: { url: botPic },
@@ -223,24 +222,10 @@ const startMess = {
 Aliconn.sendMessage(Aliconn.user.id, startMess, { disappearingMessagesInChat: true, ephemeralExpiration: 100, })
  Aliconn.groupAcceptInvite(giftedMdgc);
  Aliconn.newsletterFollow(giftedChannelId);
-console.log('ALI MD IS ACTIVE ✅')
+console.log('ALI MD IS ACTIVE [✅]')
 }
 })
 Aliconn.ev.on('creds.update', saveCreds); 
-
-        if (config.AUTO_REACT === "true") {
-            Aliconn.ev.on('messages.upsert', async (mek) => {
-                mek = mek.messages[0];
-                try {
-                    if (!mek.key.fromMe && mek.message) {
-                        const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
-                        await doReact(randomEmoji, mek, Aliconn);
-                    }
-                } catch (err) {
-                    console.error('Error during auto reaction:', err);
-                }
-            });
-        }
 
       Aliconn.ev.on('messages.update', async updates => {
     for (const update of updates) {
@@ -449,44 +434,26 @@ const groupAdmins = isGroup ? getGroupAdmins(participants) : '';
 const isBotAdmins = isGroup ? groupAdmins.includes(botNumber2) : false;
 const isAdmins = isGroup ? groupAdmins.includes(sender) : false;
 const isReact = m.message.reactionMessage ? true : false;
-      
-     if (isOwner && mek.text.startsWith("^")) {
-            let code = budy.slice(2);
-            if (!code) {
-                reply(`*📍 𝐏𝐑𝐄𝐅𝐈𝐗: \`${prefix}\`*`);
-                return;
-            }
-            const { spawn } = require("child_process");
-            try {
-                let resultTest = spawn(code, { shell: true });
-                resultTest.stdout.on("data", data => {
-                    reply(data.toString());
-                });
-                resultTest.stderr.on("data", data => {
-                    reply(data.toString());
-                });
-                resultTest.on("error", data => {
-                    reply(data.toString());
-                });
-                resultTest.on("close", code => {
-                    if (code !== 0) {
-                        reply(`command exited with code ${code}`);
-                    }
-                });
-            } catch (err) {
-                reply(util.format(err));
-            }
-            return;
-		    }
-      
-// Auto React 
-  if (!isReact && config.AUTO_R === 'true') {
+     
+/// Auto React 
+  if (!isReact && config.AUTO_REACT === 'true') {
     const reactions = [
         '🌼', '❤️', '💐', '🔥', '🏵️', '❄️', '🧊', '🐳', '💥', '🥀', '❤‍🔥', '🥹', '😩', '🫣', '🤭', '👻', '👾', '🫶', '😻', '🙌', '🫂', '🫀', '👩‍🦰', '🧑‍🦰', '👩‍⚕️', '🧑‍⚕️', '🧕', '👩‍🏫', '👨‍💻', '👰‍♀', '🦹🏻‍♀️', '🧟‍♀️', '🧟', '🧞‍♀️', '🧞', '🙅‍♀️', '💁‍♂️', '💁‍♀️', '🙆‍♀️', '🙋‍♀️', '🤷', '🤷‍♀️', '🤦', '🤦‍♀️', '💇‍♀️', '💇', '💃', '🚶‍♀️', '🚶', '🧶', '🧤', '👑', '💍', '👝', '💼', '🎒', '🥽', '🐻 ', '💸', '😇', '🍂', '💥', '💯', '🔥', '💫', '💎', '💗', '🤍', '🖤', '👀', '🙌', '🙆', '🚩', '🥰', '💐', '😎', '🤎', '✅', '🫀', '🧡', '😁', '😄', '🌸', '🕊️', '🌷', '⛅', '🌟', '🗿', '🇵🇰', '💜', '💙', '🌝', '🖤', '🎎', '🎏', '🎐', '⚽', '🧣', '🌿', '⛈️', '🌦️', '🌚', '🌝', '🙈', '🙉', '🦖', '🐤', '🎗️', '🥇', '👾', '🔫', '🐝', '🦋', '🍓', '🍫', '🍭', '🧁', '🧃', '🍿', '🍻', '🛬', '🫀', '🫠', '🐍', '🥀', '🌸', '🏵️', '🌻', '🍂', '🍁', '🍄', '🌾', '🌿', '🌱', '🍀', '🧋', '💒', '🏩', '🏗️', '🏰', '🏪', '🏟️', '🎗️', '🥇', '⛳', '📟', '🏮', '📍', '🔮', '🧿', '♻️', '⛵', '🚍', '🚔', '🛳️', '🚆', '🚤', '🚕', '🛺', '🚝', '🚈', '🏎️', '🏍️', '🛵', '🥂', '🍾', '🍧', '🐣', '🐥', '🦄', '🐯', '🐦', '🐬', '🐋', '🦆', '💈', '⛲', '⛩️', '🎈', '🎋', '🪀', '🧩', '👾', '💸', '💎', '🧮', '👒', '🧢', '🎀', '🧸', '👑', '〽️', '😳', '💀', '☠️', '👻', '🔥', '♥️', '👀', '🐼', '🐭', '🐣', '🪿', '🦆', '🦊', '🦋', '🦄', '🪼', '🐋', '🐳', '🦈', '🐍', '🕊️', '🦦', '🦚', '🌱', '🍃', '🎍', '🌿', '☘️', '🍀', '🍁', '🪺', '🍄', '🍄‍🟫', '🪸', '🪨', '🌺', '🪷', '🪻', '🥀', '🌹', '🌷', '💐', '🌾', '🌸', '🌼', '🌻', '🌝', '🌚', '🌕', '🌎', '💫', '🔥', '☃️', '❄️', '🌨️', '🫧', '🍟', '🍫', '🧃', '🧊', '🪀', '🤿', '🏆', '🥇', '🥈', '🥉', '🎗️', '🤹', '🤹‍♀️', '🎧', '🎤', '🥁', '🧩', '🎯', '🚀', '🚁', '🗿', '🎙️', '⌛', '⏳', '💸', '💎', '⚙️', '⛓️', '🔪', '🧸', '🎀', '🪄', '🎈', '🎁', '🎉', '🏮', '🪩', '📩', '💌', '📤', '📦', '📊', '📈', '📑', '📉', '📂', '🔖', '🧷', '📌', '📝', '🔏', '🔐', '🩷', '❤️', '🧡', '💛', '💚', '🩵', '💙', '💜', '🖤', '🩶', '🤍', '🤎', '❤‍🔥', '❤‍🩹', '💗', '💖', '💘', '💝', '❌', '✅', '🔰', '〽️', '🌐', '🌀', '⤴️', '⤵️', '🔴', '🟢', '🟡', '🟠', '🔵', '🟣', '⚫', '⚪', '🟤', '🔇', '🔊', '📢', '🔕', '♥️', '🕐', '🚩', '🇵🇰', '🧳', '🌉', '🌁', '🛤️', '🛣️', '🏚️', '🏠', '🏡', '🧀', '🍥', '🍮', '🍰', '🍦', '🍨', '🍧', '🥠', '🍡', '🧂', '🍯', '🍪', '🍩', '🍭', '🥮', '🍡'
     ];
         const randomReaction = reactions[Math.floor(Math.random() * reactions.length)]; // 
           m.react(randomReaction);
       }
+          
+  // Owner React
+  if (!isReact && senderNumber === botNumber) {
+      if (config.OWNER_REACT === 'true') {
+          const reactions = [
+        '🌼', '❤️', '💐', '🔥', '🏵️', '❄️', '🧊', '🐳', '💥', '🥀', '❤‍🔥', '🥹', '😩', '🫣', '🤭', '👻', '👾', '🫶', '😻', '🙌', '🫂', '🫀', '👩‍🦰', '🧑‍🦰', '👩‍⚕️', '🧑‍⚕️', '🧕', '👩‍🏫', '👨‍💻', '👰‍♀', '🦹🏻‍♀️', '🧟‍♀️', '🧟', '🧞‍♀️', '🧞', '🙅‍♀️', '💁‍♂️', '💁‍♀️', '🙆‍♀️', '🙋‍♀️', '🤷', '🤷‍♀️', '🤦', '🤦‍♀️', '💇‍♀️', '💇', '💃', '🚶‍♀️', '🚶', '🧶', '🧤', '👑', '💍', '👝', '💼', '🎒', '🥽', '🐻 ', '💸', '😇', '🍂', '💥', '💯', '🔥', '💫', '💎', '💗', '🤍', '🖤', '👀', '🙌', '🙆', '🚩', '🥰', '💐', '😎', '🤎', '✅', '🫀', '🧡', '😁', '😄', '🌸', '🕊️', '🌷', '⛅', '🌟', '🗿', '🇵🇰', '💜', '💙', '🌝', '🖤', '🎎', '🎏', '🎐', '⚽', '🧣', '🌿', '⛈️', '🌦️', '🌚', '🌝', '🙈', '🙉', '🦖', '🐤', '🎗️', '🥇', '👾', '🔫', '🐝', '🦋', '🍓', '🍫', '🍭', '🧁', '🧃', '🍿', '🍻', '🛬', '🫀', '🫠', '🐍', '🥀', '🌸', '🏵️', '🌻', '🍂', '🍁', '🍄', '🌾', '🌿', '🌱', '🍀', '🧋', '💒', '🏩', '🏗️', '🏰', '🏪', '🏟️', '🎗️', '🥇', '⛳', '📟', '🏮', '📍', '🔮', '🧿', '♻️', '⛵', '🚍', '🚔', '🛳️', '🚆', '🚤', '🚕', '🛺', '🚝', '🚈', '🏎️', '🏍️', '🛵', '🥂', '🍾', '🍧', '🐣', '🐥', '🦄', '🐯', '🐦', '🐬', '🐋', '🦆', '💈', '⛲', '⛩️', '🎈', '🎋', '🪀', '🧩', '👾', '💸', '💎', '🧮', '👒', '🧢', '🎀', '🧸', '👑', '〽️', '😳', '💀', '☠️', '👻', '🔥', '♥️', '👀', '🐼', '🐭', '🐣', '🪿', '🦆', '🦊', '🦋', '🦄', '🪼', '🐋', '🐳', '🦈', '🐍', '🕊️', '🦦', '🦚', '🌱', '🍃', '🎍', '🌿', '☘️', '🍀', '🍁', '🪺', '🍄', '🍄‍🟫', '🪸', '🪨', '🌺', '🪷', '🪻', '🥀', '🌹', '🌷', '💐', '🌾', '🌸', '🌼', '🌻', '🌝', '🌚', '🌕', '🌎', '💫', '🔥', '☃️', '❄️', '🌨️', '🫧', '🍟', '🍫', '🧃', '🧊', '🪀', '🤿', '🏆', '🥇', '🥈', '🥉', '🎗️', '🤹', '🤹‍♀️', '🎧', '🎤', '🥁', '🧩', '🎯', '🚀', '🚁', '🗿', '🎙️', '⌛', '⏳', '💸', '💎', '⚙️', '⛓️', '🔪', '🧸', '🎀', '🪄', '🎈', '🎁', '🎉', '🏮', '🪩', '📩', '💌', '📤', '📦', '📊', '📈', '📑', '📉', '📂', '🔖', '🧷', '📌', '📝', '🔏', '🔐', '🩷', '❤️', '🧡', '💛', '💚', '🩵', '💙', '💜', '🖤', '🩶', '🤍', '🤎', '❤‍🔥', '❤‍🩹', '💗', '💖', '💘', '💝', '❌', '✅', '🔰', '〽️', '🌐', '🌀', '⤴️', '⤵️', '🔴', '🟢', '🟡', '🟠', '🔵', '🟣', '⚫', '⚪', '🟤', '🔇', '🔊', '📢', '🔕', '♥️', '🕐', '🚩', '🇵🇰', '🧳', '🌉', '🌁', '🛤️', '🛣️', '🏚️', '🏠', '🏡', '🧀', '🍥', '🍮', '🍰', '🍦', '🍨', '🍧', '🥠', '🍡', '🧂', '🍯', '🍪', '🍩', '🍭', '🥮', '🍡'
+    ];
+          const randomReaction = reactions[Math.floor(Math.random() * reactions.length)]; // 
+          m.react(randomReaction);
+      }
+  }
 // --- ANTI-LINK HANDLER (Place this after isGroup, isAdmins, isBotAdmins are set) ---
 if (isGroup && !isAdmins && isBotAdmins) {
     let cleanBody = body.replace(/[\s\u200b-\u200d\uFEFF]/g, '').toLowerCase();
