@@ -127,12 +127,12 @@ async(Aliconn, mek, m, { from, quoted, isCmd, command, args, q, isGroup, sender,
 │ 📆 *ᴅᴀᴛᴇ ᴛᴏᴅᴀʏ* : ${monospace(date)}
 │ 🌏 *ᴛɪᴍᴇ ᴢᴏɴᴇ* : ${monospace(tz)}
 │ 🏓 *sᴇʀᴠᴇʀ* : ${monospace(ram)}
-╰───────────────────⊷${readmore}\n`;
+╰──────────────────⊷${readmore}\n`;
 
         const formatCategory = (category, gmds) => {
-    const title = `\`『 ${monospace(category.toUpperCase())} 』\`\n╭───────────────────⊷\n`;
+    const title = `\`『 ${monospace(category.toUpperCase())} 』\`\n╭──────────────────⊷\n`;
     const body = gmds.map(gmd => `*┋ ⬡ ${smallCaps(gmd)}*`).join('\n');
-    const footer = `╰───────────────────⊷`;
+    const footer = `╰──────────────────⊷`;
     return `${title}${body}\n${footer}`;
 };
 
@@ -162,6 +162,7 @@ async(Aliconn, mek, m, { from, quoted, isCmd, command, args, q, isGroup, sender,
         reply(`${e}`);
     }
 });
+
 gmd({
     pattern: "ping",
     alias: ["speed","pong"],
@@ -220,6 +221,7 @@ async(Aliconn, mek, m, { from, quoted, isCmd, command, args, q, isGroup, sender,
         reply(`${e}`);
     }
 });
+
 gmd({
     pattern: "list",
     alias: ["listmenu"],
@@ -314,7 +316,6 @@ await m.react("✅");
         reply(`${e}`);
     }
 });
-
 
 gmd({
     pattern: "menus",
@@ -416,7 +417,6 @@ async (Aliconn, mek, m, { from, quoted, sender, pushname, reply }) => {
     }
 });
 
-
 gmd({
     pattern: "report",
     alias: ["request"],
@@ -453,8 +453,7 @@ await m.react("✅");
 reply(e)
 console.log(e)
 }
-})
-
+});
 
   gmd({
     pattern: "repo",
@@ -470,7 +469,7 @@ try{
 const response = await axios.get(global.giftedApiRepo);
     const repoData = response.data;
     const { full_name, name, forks_count, stargazers_count, created_at, updated_at, owner } = repoData;
-    const messageText = `╭─────────────────⳹\n│ *🎗️ ɴᴀᴍᴇ:* ALI-MD\n│ *⭐ sᴛᴀʀs:* 254\n│ *🧩 ғᴏʀᴋs:* 1226\n│ *🧮 ᴄʀᴇᴀᴛᴇᴅ ᴏɴ:* 3/14/2025\n│ *📮 ʟᴀsᴛ ᴜᴘᴅᴀᴛᴇᴅ:* 8/5/2025\n│ *👑 ᴏᴡɴᴇʀ:* ALI INXIDE\n╰─────────────────⳹\n*ʀᴇᴘᴏ ʟɪɴᴋ:* https://github.com/ALI-INXIDE/ALI-MD`;
+    const messageText = `╭─────────────────⳹\n│ *🎗️ ɴᴀᴍᴇ:* ALI-MD\n│ *⭐ sᴛᴀʀs:* 254\n│ *🧩 ғᴏʀᴋs:* 1526\n│ *🧮 ᴄʀᴇᴀᴛᴇᴅ ᴏɴ:* 3/14/2024\n│ *📮 ʟᴀsᴛ ᴜᴘᴅᴀᴛᴇᴅ:* 8/5/2025\n│ *👑 ᴏᴡɴᴇʀ:* ALI INXIDE\n╰─────────────────⳹\n*ʀᴇᴘᴏ ʟɪɴᴋ:* https://github.com/ALI-INXIDE/ALI-MD`;
     let gift = {
             key: {
                 fromMe: false,
@@ -504,7 +503,7 @@ await m.react("✅");
 console.log(e)
 reply(`${e}`)
 }
-})
+});
 
 
 gmd({
@@ -536,71 +535,7 @@ await m.react("✅");
 console.log(e)
 reply(`${e}`)
 }
-})
-
-
-gmd({
-    pattern: "test",
-    desc: "Check Bot's Status",
-    category: "general",
-    react: "👓",
-    filename: __filename
-},
-async (Aliconn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
-    try {
-        const audioUrls = [
-        'https://files.catbox.moe/nfnb5k.mp3',
-        'https://files.catbox.moe/u8mlc9.mp4',
-        'https://files.catbox.moe/c0p5t8.mp3',
-        'https://files.catbox.moe/s41x34.mp3',
-        'https://files.catbox.moe/rys34d.mp3'
-      ];
-      const randomAudioUrl = audioUrls[Math.floor(Math.random() * audioUrls.length)];
-        let gift = {
-            key: {
-                fromMe: false,
-                participant: `0@s.whatsapp.net`,
-                remoteJid: "status@broadcast"
-            },
-            message: {
-                contactMessage: {
-                    displayName: `${monospace(pushname)}`,
-                    vcard: `BEGIN:VCARD\nVERSION:3.0\nN:;a,;;;\nFN:'GIFTED'\nitem1.TEL;waid=${m.sender.split("@")[0]}:${m.sender.split("@")[0]}\nitem1.X-ABLabel:Ponsel\nEND:VCARD`
-                }
-            }
-        };
-        const buffer = await getBuffer(randomAudioUrl);
-        const giftedMess = {
-        audio: buffer,
-        mimetype: 'audio/mpeg',
-        ptt: true,
-        waveform: [1000, 0, 1000, 0, 1000, 0, 1000],
-        contextInfo: {
-        mentionedJid: [m.sender], 
-          forwardingScore: 0,
-          isForwarded: true,
-          forwardedNewsletterMessageInfo: {
-           newsletterJid: '120363318387454868@newsletter',
-           newsletterName: "-𝐀ɭīī 𝐌𝐃 𝐒𝐔𝐏𝐏𝐎𝐑𝐓°💀🇦🇱",
-           serverMessageId: 143
-           }, 
-          externalAdReply: {
-            title: "𝐀𝐋𝐈 𝐌𝐃 𝐈𝐒 𝐀𝐂𝐓𝐈𝐕𝐄",
-            body: `ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴀʟɪ ᴛᴇᴄʜ `,
-            thumbnailUrl: botPic,
-            sourceUrl: `https://whatsapp.com/channel/0029VaoRxGmJpe8lgCqT1T2h`,
-            mediaType: 5,
-            renderLargerThumbnail: false
-          }
-        }
-      };
-      await Aliconn.sendMessage(from, giftedMess, { quoted: gift });
-      await m.react("✅"); 
-    } catch (e) {
-        console.log(e)
-        reply(`${e}`)
-    }
-})
+});
 
 gmd({
     pattern: "alive",
@@ -657,7 +592,7 @@ async (Aliconn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, 
         console.log(e)
         reply(`${e}`)
     }
-})
+});
 
 gmd({
     pattern: "runtime",
@@ -706,35 +641,4 @@ async (Aliconn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, 
         console.log(e)
         reply(`${e}`)
     }
-})
- 
-gmd({
-    pattern: "uptime2",
-    alias: ["runtime2"],
-    desc: "Check Bot's Server Runtime.",
-    category: "general",
-    react: "⚡",
-    filename: __filename
-},
-async (Aliconn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
-    try {
-        const uptimeSeconds = process.uptime();
-        const days = Math.floor(uptimeSeconds / (24 * 3600));
-        const hours = Math.floor((uptimeSeconds % (24 * 3600)) / 3600);
-        const minutes = Math.floor((uptimeSeconds % 3600) / 60);
-        const seconds = Math.floor(uptimeSeconds % 60);
-        const message = await Aliconn.sendMessage(from, 
-            { text: '*Connecting Server...*' }, 
-            { quoted: mek });
-        const text =  `*Bot Has Been Up For: _${days}d ${hours}h ${minutes}m ${seconds}s_*`;
-        await Aliconn.sendMessage(from, {
-            text: text,
-            edit: message.key }, 
-            { quoted: mek });
-        await m.react("✅"); 
-    } catch (e) {
-        console.log(e);
-        reply(`${e}`);
-    }
 });
-     
