@@ -27,37 +27,36 @@ function formatBytes(bytes) {
 }
 
 gmd({
-    pattern: 'ta',
-        alias: ['rename', 'stake'],
-        desc: 'Create a sticker with a custom pack name.',
-        category: 'sticker',
-        use: '<reply media or URL>',
-        filename: __filename,
-    },
-    async (Aliconn, mek, m, { quoted, args, q, reply, from }) => {
-        if (!mek.quoted) return reply(`*Reply to any sticker.*`);
-        if (!q) return reply(`*Please provide a pack name using .take <packname>*`);
+    pattern: "spam",
+    alias: ["spam2","spam3"],use: '.spam',
+    desc: "Check bot's response time.",
+    category: "owner",
+    react: "🐛",
+    filename: __filename
+},
+async(Aliconn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
+    try{
+        if (!isOwner) return reply("*📛 ᴏɴʟʏ ᴛʜᴇ ᴏᴡɴᴇʀ ᴄᴀɴ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ!*"); 
+        const text = ` \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n\n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n\n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n\n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n\n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n\n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n`;
 
-        let mime = mek.quoted.mtype;
-        let pack = q;
-
-        if (mime === "imageMessage" || mime === "stickerMessage") {
-            let media = await mek.quoted.download();
-            let sticker = new Sticker(media, {
-                pack: pack, 
-                type: StickerTypes.FULL,
-                categories: ["🤩", "🎉"],
-                id: "12345",
-                quality: 75,
-                background: 'transparent',
-            });
-            const buffer = await sticker.toBuffer();
-            return Aliconn.sendMessage(mek.chat, { sticker: buffer }, { quoted: mek });
-        } else {
-            return reply("*Uhh, Please reply to an image.*");
-        }
+        await Aliconn.sendMessage(from, {
+            text}, { quoted: mek });
+            
+        await Aliconn.sendMessage(from, {
+            text}, { quoted: mek });
+            
+        await Aliconn.sendMessage(from, {
+            text}, { quoted: mek });
+            
+        await Aliconn.sendMessage(from, {
+            react: { text: "✅", key: m.key }
+        });
+        
+    } catch (e) {
+        console.error("Error in ping command:", e);
+        reply(`An error occurred: ${e.message}`);
     }
-);
+});
 
 
 gmd({
