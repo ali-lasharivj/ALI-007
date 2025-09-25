@@ -13,433 +13,6 @@ const { gmd, config, commands, getBuffer, getSudoNumbers,
        makeInMemoryStore } = require('@whiskeysockets/baileys');
 //const store = makeInMemoryStore({});
 
-let chatbotEnabled = false, 
-       chatbotInGroups = false, 
-       chatbotInInbox = false, 
-       autoBioEnabled = false;
-let autoBioInterval;
-let secondCount = 1;  
-
-autoBioEnabled = config.AUTO_BIO === "true";
-chatbotEnabled = config.CHAT_BOT === "true";
-chatbotInInbox = config.CHAT_BOT === "inbox";
-chatbotInGroups = config.CHAT_BOT === "groups";
-
-
-function saveConfig() {
-    let configContent = '';
-    for (let key in config) {
-        configContent += `${key}=${config[key]}\n`;
-    }
-    const envFilePath = path.resolve(__dirname, '../.env');
-    fs.writeFileSync(envFilePath, configContent, 'utf8');
-}
-
-function formatUptime(seconds) {
-            const days = Math.floor(seconds / (24 * 60 * 60));
-            seconds %= 24 * 60 * 60;
-            const hours = Math.floor(seconds / (60 * 60));
-            seconds %= 60 * 60;
-            const minutes = Math.floor(seconds / 60);
-            seconds = Math.floor(seconds % 60);
-            return `${days}d ${hours}h ${minutes}m ${seconds}s`;
-        }
-
-        const now = new Date();
-        const date = new Intl.DateTimeFormat('en-GB', {
-            timeZone: tz,
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-        }).format(now);
-
-        const time = new Intl.DateTimeFormat('en-GB', {
-            timeZone: tz,
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: true
-        }).format(now);
-
-        const uptime = formatUptime(process.uptime());
-
-gmd({
-    pattern: "mod",
-    react: "🫟",
-    desc: "Set bot mode to private or public.",
-    category: "owner",
-    filename: __filename,
-}, async (Aliconn, mek, m, { from, args, isOwner, reply }) => {
-    if (!isOwner) return reply("*🫟σɴℓу тнє σωɴєʀ ¢αɴ ᴜѕє тнιѕ ¢σммαɴ∂!*");
-
-    // Si aucun argument n'est fourni, afficher le mode actuel et l'usage
-    if (!args[0]) {
-        return reply(`*🏷️ єχαмρℓє: мσ∂є ρυвℓι¢/ρʀιναтє*`);
-    }
-
-    const modeArg = args[0].toLowerCase();
-
-    if (modeArg === "private") {
-        config.MODE = "private";
-        return reply("*🛰️ вσт мσ∂є ιѕ ɴσω ѕєт тσ ρʀιναтє*");
-    } else if (modeArg === "public") {
-        config.MODE = "public";
-        return reply("*✅ вσт мσ∂є ιѕ ɴσω ѕєт тσ ρυвℓι¢*")
-        const {exec} = require("child_process")
-reply("*_RESTARTING NOW...🚀_*")
-await sleep(1500)
-exec("pm2 restart all")
-reply("*_ALI-MD STARTED NOW...🚀_*");
-    } else {
-        return reply("*🏷️ єχαмρℓє: мσ∂є ρυвℓι¢/ρʀιναтє*");
-    }
-});
-
-gmd({
-    pattern: "broadcast",
-    desc: "Broadcast a Message to All Groups.",
-    category: "owner",
-    react: "📢",
-    filename: __filename
-},
-async (Aliconn, mek, m, { from, isOwner, args, reply }) => {
-    if (!isOwner) return reply("*📛 тнιѕ ιѕ αɴ σωɴєʀ ᴄσммαɴ∂*");
-    if (args.length === 0) return reply("📢 Provide a message to breadcast after the command.");
-    const message = args.join(' ');
-    const groups = Object.keys(await Aliconn.groupFetchAllParticipating());
-    for (const groupId of groups) {
-    await Aliconn.sendMessage(groupId, {
-    image: { url: config.BOT_PIC },
-    caption: message 
-}, { quoted: mek });
-
-    }
-    reply("📢 Message Delivered to all your groups.");
-});
-
-
-
-    gmd({
-    pattern: "setpp",
-    desc: "Set Bot Profile Picture.",
-    category: "owner",
-    react: "🖼️",
-    filename: __filename
-},
-async (Aliconn, mek, m, { isOwner, quoted, reply }) => {
-    try {
-        if (!isOwner) return reply("*📛 тнιѕ ιѕ αɴ σωɴєʀ ᴄσммαɴ∂*");
-
-        if (!quoted || quoted.mtype !== "image") {
-            return reply("❌ Please reply to an image.");
-        }
-
-        const buffer = await quoted.download(); // gets image as buffer
-
-        if (!buffer) return reply("⚠️ Could not download the image.");
-
-        await Aliconn.updateProfilePicture(Aliconn.user.id, buffer);
-        reply("✅ Bot profile picture updated successfully!");
-    } catch (error) {
-        console.error("❌ Error updating profile picture:", error);
-        reply(`❌ Failed to update profile picture: ${error.message}`);
-    }
-});
-
-gmd({
-    pattern: "exec",
-    alias: ["$", "run", "terminal", "code", "execute", ">", "shell"],
-    desc: "Execute Terminal Commands.",
-    category: "owner",
-    react: "💻",
-    filename: __filename
-}, async (Aliconn, mek, m, { reply, isOwner, isMe, botNumber2, botNumber, q }) => {
-    if (!isOwner && !isMe && !botNumber2 && !botNumber) return reply("*📛 тнιѕ ιѕ αɴ σωɴєʀ ᴄσммαɴ∂*");
-    if (!q) return reply("Provide a terminal command to execute.");
-    exec(q, (err, stdout, stderr) => {
-        if (err) return reply(`❌ Error: ${err.message}`);
-        if (stderr) return reply(`⚠️ Stderr: ${stderr}`);
-        if (stdout) reply(stdout.trim());
-    });
-});
-
-
-
-
-gmd({
-    pattern: "eval3",
-    alias: ["<", "e", "evaluate"],
-    desc: "Evaluate JavaScript Code.",
-    category: "owner",
-    react: "🧠",
-    filename: __filename
-}, async (Aliconn, mek, m, { reply, isOwner, q }) => {
-    if (!isOwner) return reply("*📛 тнιѕ ιѕ αɴ σωɴєʀ ᴄσммαɴ∂*");
-    if (!q) return reply("Provide some code to evaluate.");
-
-    try {
-        const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
-
-        const fn = new AsyncFunction("Aliconn", "mek", "m", "reply", "console", `
-            (async () => {
-                try {
-                    ${q}
-                } catch (innerErr) {
-                    await reply("❌ Eval Error: " + (innerErr?.stack || innerErr?.message || innerErr));
-                }
-            })();
-        `);
-
-        await fn(Aliconn, mek, m, reply, console);
-    } catch (err) {
-        await reply("❌ Fatal Eval Error: " + (err?.stack || err?.message || err));
-    }
-});
-
-gmd({
-    pattern: "eval",
-    alias: ["<", "e", "evaluate"],
-    desc: "Evaluate JavaScript Code.",
-    category: "owner",
-    react: "🧠",
-    filename: __filename
-}, async (Aliconn, mek, m, { reply, isOwner, q }) => {
-    if (!isOwner) return reply("*📛 тнιѕ ιѕ αɴ σωɴєʀ ᴄσммαɴ∂*");
-    if (!q) return reply("Provide some code to evaluate.");
-    try {
-        let result = /await/i.test(q)
-            ? await eval(`(async () => { ${q} })()`)
-            : eval(q);
-        reply(util.format(result));
-    } catch (err) {
-        reply(`❌ Error: ${util.format(err)}`);
-    }
-});
-
-
-
-gmd({
-    pattern: "fetch",
-    alias: ["get", "download", "load", "axios"],
-    desc: "Get Data/Files from URLs",
-    category: "owner",
-    react: "🔎",
-    filename: __filename
-}, async (Aliconn, mek, m, { from, reply, isOwner, q }) => {
-    if (!isOwner) return reply("*📛 тнιѕ ιѕ αɴ σωɴєʀ ᴄσммαɴ∂*");
-    if (!q) return reply("Provide a URL to get data from");
-    if (!/^https?:\/\//.test(q)) return reply('Start the *URL* with http:// or https://');
-    try {
-        const url = new URL(q).href;
-        const response = await fetch(url);
-        const contentLength = response.headers.get('content-length');
-        if (contentLength && contentLength > 50 * 1024 * 1024) {
-            return reply(`❌ Content-Length exceeds limit: ${contentLength}`);
-        }
-        const contentType = response.headers.get('content-type') || '';
-        if (/image\//.test(contentType)) {
-            const buffer = Buffer.from(await response.arrayBuffer());
-            await Aliconn.sendMessage(from, { image: buffer, caption: `> ${global.footer}` });
-            return;
-        } else if (/audio\//.test(contentType)) {
-            const buffer = Buffer.from(await response.arrayBuffer());
-            await Aliconn.sendMessage(from, { audio: buffer, mimetype: contentType, ptt: false }); 
-            return;
-        } else if (/video\//.test(contentType)) {
-            const buffer = Buffer.from(await response.arrayBuffer());
-            await Aliconn.sendMessage(from, { video: buffer, caption: `> ${global.footer}` });
-            return;
-        }
-        let content = '';
-        if (/application\/json/.test(contentType)) {
-            content = JSON.stringify(await response.json(), null, 2);
-        } else if (/text/.test(contentType)) {
-            content = await response.text();
-        } else {
-            return reply("❌ Unsupported content type.");
-        }
-        reply(content.slice(0, 65536)); 
-    await m.react("✅"); 
-    } catch (error) {
-        console.error('Fetch Error:', error);
-        reply(`❌ Error: ${error.message}`);
-    }
-});
-
-
-gmd({
-    pattern: "pair",
-    alias: ["getsess", "paircode", "linkphone", "getpaircodd"],
-    desc: "Generate Paircode",
-    category: "owner",
-    react: "📱",
-    filename: __filename
-},
-async (Aliconn, mek, m, { from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, isItzcp, groupAdmins, isBotAdmins, isAdmins, reply }) => {
-    if (!isOwner) return reply("*📛 тнιѕ ιѕ αɴ σωɴєʀ ᴄσммαɴ∂*");
-    if (!q) return reply("Provide a Phone Number to Genrrate PairingCode!");
-    try {
-        const response = await fetchJson(`${global.session}/code?number=${encodeURIComponent(q)}`);
-        const getsess = response.code;
-        const answer = `Dear *_${m.pushName}_*,\nYour ALI MD PairingCode is: *${getsess}*\nUse it to Link Your WhatsApp Within 1 Minute Before it Expires\nThereafter, Obtain Your Session ID.\nHappy Bot Deployment!!!\n\n${global.caption}`;
-        const giftedMess = {
-        image: { url: config.BOT_PIC },
-        caption: answer,
-        contextInfo: {
-          mentionedJid: [m.sender],
-          forwardingScore: 5,
-          isForwarded: true,
-          forwardedNewsletterMessageInfo: {
-            newsletterJid: '120363318387454868@newsletter',
-                        newsletterName: "𝐀𝐋𝐈-𝐌𝐃 𝐒𝐔𝐏𝐏𝐎𝐑𝐓-💸",
-            serverMessageId: 143
-          }
-        }
-      };
-      await Aliconn.sendMessage(from, giftedMess, { disappearingMessagesInChat: true, ephemeralExpiration: 100 }, { quoted: mek });
-      await Aliconn.sendMessage(from, { text: getsess }, { quoted: mek });
-      await m.react('✅');
-  } catch (error) {
-        reply(`❌ Error fetching paircode code: ${error.message}`);
-    }
-});
-
-
-
-gmd({
-    pattern: "welcome",
-    alias: ["setwelcome"],
-    desc: "Enable or Disable Welcome Messages in Groups",
-    category: "owner",
-    react: "👋",
-    filename: __filename
-}, async (Aliconn, mek, m, { from, q, body, reply, isOwner }) => {
-    if (!isOwner) return reply("*📛 тнιѕ ιѕ αɴ σωɴєʀ ᴄσммαɴ∂*");
-      const infoMess = {
-            image: { url: config.BOT_PIC },
-            caption: `*𝐖𝐄𝐋𝐂𝐎𝐌𝐄 𝐒𝐄𝐓𝐓𝐈𝐍𝐆𝐒*  
-
-*ʀєρℓу ωιтн ɴυмвєʀ:*
-
-*1. тσ єɴαвℓє gʀσυρ ωєℓ¢σмє мєѕѕαgєѕ*
-*2. тσ ∂ιѕαвℓє gʀσυρ ωєℓ¢σмє мєѕѕαgєѕ*
-
-╭───────────────┄┈┈  
-│ *${global.footer}*
-╰───────────────┄┈┈`,
-            contextInfo: {
-                mentionedJid: [m.sender],
-                forwardingScore: 5,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363318387454868@newsletter',
-                        newsletterName: "𝐀𝐋𝐈-𝐌𝐃 𝐒𝐔𝐏𝐏𝐎𝐑𝐓-💸",
-                    serverMessageId: 143
-                }
-            }
-        };
-
-        const messageSent = await Aliconn.sendMessage(from, infoMess);
-        const messageId = messageSent.key.id;
-        Aliconn.ev.on("messages.upsert", async (event) => {
-            const messageData = event.messages[0];
-            if (!messageData.message) return;
-            const messageContent = messageData.message.conversation || messageData.message.extendedTextMessage?.text;
-            const isReplyToDownloadPrompt = messageData.message.extendedTextMessage?.contextInfo?.stanzaId === messageId;
-
-            if (isReplyToDownloadPrompt) {
-                await m.react("👋");
-                switch (messageContent) {
-                    case "1": 
-                        config.WELCOME = "true";
-                        saveConfig();
-                        return reply("Welcome messages are enabled.");
-                        break;
-
-                    case "2": 
-                        config.WELCOME = "false";
-                        saveConfig();
-                        return reply("Welcome messages are disabled.");
-                        break;
-                            
-                    default:
-                  await Aliconn.sendMessage(from, { text: "Invalid option selected. Please reply with a valid number (1 or 2)." });
-                }
-            }
-        }); 
-      await m.react("✅");
-});
-
-
-
-
-gmd({
-    pattern: "goodbye",
-    alias: ["setgoodbye"],
-    desc: "Enable or Disable Goodbye Messages in Groups",
-    category: "owner",
-    react: "👋",
-    filename: __filename
-}, async (Aliconn, mek, m, { from, q, body, reply, isOwner }) => {
-      if (!isOwner) return reply("*📛 тнιѕ ιѕ αɴ σωɴєʀ ᴄσммαɴ∂*");
-    const infoMess = {
-            image: { url: config.BOT_PIC },
-            caption: `*𝐆𝐎𝐎𝐃𝐁𝐘𝐄 𝐒𝐄𝐓𝐓𝐈𝐍𝐆𝐒*
-
-*ʀєρℓу ωιтн ɴυмвєʀ:*
-
-*1. тσ єɴαвℓє gʀσυρ gσσ∂вує мєѕѕαgєѕ*
-*2. тσ ∂ιѕαвℓє gʀσυρ gσσ∂вує мєѕѕαgєѕ*
-
-╭───────────────┄┈┈  
-│ *${global.footer}*
-╰───────────────┄┈┈`,
-            contextInfo: {
-                mentionedJid: [m.sender],
-                forwardingScore: 5,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363318387454868@newsletter',
-                        newsletterName: "𝐀𝐋𝐈-𝐌𝐃 𝐒𝐔𝐏𝐏𝐎𝐑𝐓-💸",
-                    serverMessageId: 143
-                }
-            }
-        };
-
-        const messageSent = await Aliconn.sendMessage(from, infoMess);
-        const messageId = messageSent.key.id;
-        Aliconn.ev.on("messages.upsert", async (event) => {
-            const messageData = event.messages[0];
-            if (!messageData.message) return;
-            const messageContent = messageData.message.conversation || messageData.message.extendedTextMessage?.text;
-            const isReplyToDownloadPrompt = messageData.message.extendedTextMessage?.contextInfo?.stanzaId === messageId;
-
-            if (isReplyToDownloadPrompt) {
-                await m.react("👋");
-                switch (messageContent) {
-                    case "1": 
-                        config.GOODBYE = "true";
-                        saveConfig();
-                        return reply("Goodbye messages are enabled.");
-                        break;
-
-                    case "2": 
-                        config.GOODBYE = "false";
-                        saveConfig();
-                        return reply("Goodbye messages are disabled.");
-                        break;
-                            
-                    default:
-                  await Aliconn.sendMessage(from, { text: "Invalid option selected. Please reply with a valid number (1 or 2)." });
-                }
-            }
-        }); 
-      await m.react("✅");
-});
-
-
-
-
 gmd({
     pattern: "myprivacy",
     alias: ["allprivacy", "listprivacy", "privacy", "privacy-settings", "myprivacy"],
@@ -940,708 +513,707 @@ async (Aliconn, mek, m, { from, isOwner, reply, args }) => {
 
 
 gmd({
-    pattern: "chatbot",
-    desc: "Enable or Disable Chatbot",
+    pattern: "broadcast",
+    desc: "Broadcast a Message to All Groups.",
     category: "owner",
-    react: "🤖",
+    react: "📢",
     filename: __filename
-}, async (Aliconn, mek, m, { from, body, isGroup, isOwner, q, isAdmins, isBotAdmins, reply }) => {
-    try {
-        if (!isOwner) return reply('*📛 тнιѕ ιѕ αɴ σωɴєʀ ᴄσммαɴ∂*');
-          
-          const infoMess = {
-            image: { url: config.BOT_PIC },
-            caption: `*𝐂𝐇𝐀𝐓𝐁𝐎𝐓 𝐒𝐄𝐓𝐓𝐈𝐍𝐆𝐒*  
+},
+async (Aliconn, mek, m, { from, isOwner, args, reply }) => {
+    if (!isOwner) return reply("*📛 тнιѕ ιѕ αɴ σωɴєʀ ᴄσммαɴ∂*");
+    if (args.length === 0) return reply("📢 Provide a message to breadcast after the command.");
+    const message = args.join(' ');
+    const groups = Object.keys(await Aliconn.groupFetchAllParticipating());
+    for (const groupId of groups) {
+    await Aliconn.sendMessage(groupId, {
+    image: { url: config.BOT_PIC },
+    caption: message 
+}, { quoted: mek });
 
-*ʀєρℓу ωιтн ɴυмвєʀ:*
-
-*1. тσ єɴαвℓє gℓσвαℓℓу*
-*2. тσ єɴαвℓє ιɴ gʀσυρѕ*
-*3. тσ єɴαвℓє ιɴ ιɴвσχ*
-*4. тσ ∂ιѕαвℓє gℓσвαℓℓу*
-
-╭───────────────┄┈┈  
-│ *${global.footer}*
-╰───────────────┄┈┈`,
-            contextInfo: {
-                mentionedJid: [m.sender],
-                forwardingScore: 5,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363318387454868@newsletter',
-                        newsletterName: "𝐀𝐋𝐈-𝐌𝐃 𝐒𝐔𝐏𝐏𝐎𝐑𝐓-💸",
-                    serverMessageId: 143
-                }
-            }
-        };
-
-        const messageSent = await Aliconn.sendMessage(from, infoMess);
-        const messageId = messageSent.key.id;
-        Aliconn.ev.on("messages.upsert", async (event) => {
-            const messageData = event.messages[0];
-            if (!messageData.message) return;
-            const messageContent = messageData.message.conversation || messageData.message.extendedTextMessage?.text;
-            const isReplyToDownloadPrompt = messageData.message.extendedTextMessage?.contextInfo?.stanzaId === messageId;
-
-            if (isReplyToDownloadPrompt) {
-                await m.react("🤖");
-                switch (messageContent) {
-                    case "1": 
-                       chatbotEnabled = true;
-                       return reply("*Chatbot has been enabled globally(all chats)!*");
-                        break;
-
-                    case "2": 
-                        chatbotInGroups = true;
-                        chatbotInInbox = false;
-                        return reply("*Chatbot will work in group chats Only!*");
-                        break;
-
-                    case "3": 
-                        chatbotInInbox = true;
-                        chatbotInGroups = false;
-                        return reply("*Chatbot will work in personal chats (inbox) Only!*");
-                        break;
-
-                    case "4": 
-                        chatbotEnabled = false;
-                        return reply("*Chatbot has been disabled globally(all chats)!*");
-                        break;
-
-                    default:
-                  await Aliconn.sendMessage(from, { text: "Invalid option selected. Please reply with a valid number (1, 2, 3 or 4)." });
-                }
-            }
-        }); 
-      await m.react("✅");
-    } catch (e) {
-        console.log(e);
-        reply(`Error: ${e}`);
     }
+    reply("📢 Message Delivered to all your groups.");
 });
 
-gmd({
-    on: "body"
-}, async (Aliconn, mek, m, { from, body, isMe, isOwner, isGroup, reply }) => {
+
+
+    gmd({
+    pattern: "setpp",
+    desc: "Set Bot Profile Picture.",
+    category: "owner",
+    react: "🖼️",
+    filename: __filename
+},
+async (Aliconn, mek, m, { isOwner, quoted, reply }) => {
     try {
-        if (chatbotEnabled) {
-            if (isMe) {
-                return;
-            }
-            if ((chatbotInGroups && !isGroup) || (chatbotInInbox && isGroup)) {
-                return; 
-            }
-            const q = body;
-            let data;
-            try {
-                data = await fetchJson(`${global.api}/ai/gpt?apikey=${global.myName}&q=${encodeURIComponent(q)}`);
-                if (data && data.result) {
-                     return reply(data.result);
-                }
-            } catch (e) {
-                console.log('Gpt API failed or no valid response:', e);
-            }
-            try {
-                data = await fetchJson(`${global.api}/ai/geminiaipro?apikey=${global.myName}&q=${encodeURIComponent(q)}`);
-                if (data && data.result) {
-                  return reply(data.result);
-                }
-            } catch (e) {
-                console.log('Gemini API failed or no valid response:', e);
-            }
-            try {
-                data = await fetchJson(`${global.api}/ai/gpt-turbo?apikey=${global.myName}&q=${encodeURIComponent(q)}`);
-                if (data && data.result) {
-                   return reply(data.result);
-                }
-            } catch (e) {
-                console.log('GPT-3 Turbo API failed or no valid response:', e);
-            }
-            try {
-                data = await fetchJson(`${global.api}/ai/geminiai?apikey=${global.myName}&q=${encodeURIComponent(q)}`);
-                if (data && data.result) {
-                   return reply(data.result);
-                }
-            } catch (e) {
-                console.log('Gemini failed or no valid response:', e);
-            }
-            return reply("Sorry, I couldn't generate a response. Please try again later.");
+        if (!isOwner) return reply("*📛 тнιѕ ιѕ αɴ σωɴєʀ ᴄσммαɴ∂*");
+
+        if (!quoted || quoted.mtype !== "image") {
+            return reply("❌ Please reply to an image.");
         }
 
-        if (config.AUTO_BIO === "true") {
-            startAutoBio(Aliconn);
-            console.log("👨‍💻 AutoBIO started automatically as per config.");
-        }
-        // Auto audio
-        if (config.AUTO_AUDIO === 'true') {
-            try {
-                let { data } = await axios.get('https://github.com/edugifted/gifted-db/raw/refs/heads/main/autovoice/autovoice.json');
-                for (let vr in data) {
-                    let escapedVr = vr.replace(/[.*+?^=!:${}()|\[\]\/\\]/g, '\\$&');
-                    let regex = new RegExp(`\\b${escapedVr}\\b`, 'gi');
-                    if (regex.test(body)) {
-                      const buffer = await getBuffer(data[vr]);
-                        return Aliconn.sendMessage(from, {
-                            audio: buffer,
-                            mimetype: 'audio/mpeg',
-                            ptt: true
-                        }, { quoted: mek });
-                    }
-                }
-            } catch (error) {
-                console.error(error);
-                reply("An error occurred while processing the message.");
-            }
-        }
+        const buffer = await quoted.download(); // gets image as buffer
+
+        if (!buffer) return reply("⚠️ Could not download the image.");
+
+        await Aliconn.updateProfilePicture(Aliconn.user.id, buffer);
+        reply("✅ Bot profile picture updated successfully!");
     } catch (error) {
-        console.error(error);
-        reply("An unexpected error occurred.");
+        console.error("❌ Error updating profile picture:", error);
+        reply(`❌ Failed to update profile picture: ${error.message}`);
     }
 });
 
 gmd({
-    pattern: "autoread",
-    alias: ["setautoread", "setread", "readmessages", "setreadmessages", "autoreadmessages", "setautoreadmessages"],
-    desc: "Enable or Disable Auto Read Messages",
+    pattern: "exec",
+    alias: ["$", "run", "terminal", "code", "execute", ">", "shell"],
+    desc: "Execute Terminal Commands.",
     category: "owner",
-    react: "📖",
+    react: "💻",
     filename: __filename
-}, async (Aliconn, mek, m, { from, q, body, reply, isOwner }) => {
-      if (!isOwner) return reply("*📛 тнιѕ ιѕ αɴ σωɴєʀ ᴄσммαɴ∂*");
-      const infoMess = {
-            image: { url: config.BOT_PIC },
-            caption: `*𝐀𝐔𝐓𝐎 𝐑𝐄𝐀𝐃 𝐒𝐄𝐓𝐓𝐈𝐍𝐆𝐒*  
-
-*ʀєρℓу ωιтн ɴυмвєʀ:*
-
-*1. тσ єɴαвℓє αυтσʀєα∂ αℓℓ мєѕѕαgєѕ*
-*2. тσ єɴαвℓє αυтσʀєα∂ ¢σммαɴ∂ѕ σɴℓу*
-*3. тσ ∂ιѕαвℓє αυтσʀєα∂ fєαтυʀє gℓσвαℓℓу*
-
-╭───────────────┄┈┈  
-│ *${global.footer}*
-╰───────────────┄┈┈`,
-            contextInfo: {
-                mentionedJid: [m.sender],
-                forwardingScore: 5,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363318387454868@newsletter',
-                        newsletterName: "𝐀𝐋𝐈-𝐌𝐃 𝐒𝐔𝐏𝐏𝐎𝐑𝐓-💸",
-                    serverMessageId: 143
-                }
-            }
-        };
-
-        const messageSent = await Aliconn.sendMessage(from, infoMess);
-        const messageId = messageSent.key.id;
-        Aliconn.ev.on("messages.upsert", async (event) => {
-            const messageData = event.messages[0];
-            if (!messageData.message) return;
-            const messageContent = messageData.message.conversation || messageData.message.extendedTextMessage?.text;
-            const isReplyToDownloadPrompt = messageData.message.extendedTextMessage?.contextInfo?.stanzaId === messageId;
-
-            if (isReplyToDownloadPrompt) {
-                await m.react("📖");
-                switch (messageContent) {
-                    case "1": 
-                       config.AUTO_READ_MESSAGES = "true";
-                       saveConfig();
-                       return reply("Auto Read is enabled for all.");
-                        break;
-
-                    case "2": 
-                        config.AUTO_READ_MESSAGES = "commands";
-                        saveConfig();
-                        return reply("*Auto Read is enabled for commands only*");
-                        break;
-
-                    case "3": 
-                        config.AUTO_READ_MESSAGES = "false";
-                        saveConfig();
-                        return reply("Auto Read is disabled.");
-                        break;
-                            
-                    default:
-                  await Aliconn.sendMessage(from, { text: "Invalid option selected. Please reply with a valid number (1, 2 or 3)." });
-                }
-            }
-        }); 
-      await m.react("✅");
-});
-
-gmd({
-    pattern: "autoview",
-    alias: ["setviewstatus", "setautoview", "autoviewstatus", "viewstatus", "setautoviewstatus"],
-    desc: "Enable or disable Auto Read",
-    category: "owner",
-    react: "📖",
-    filename: __filename
-}, async (Aliconn, mek, m, { from, q, body, reply, isOwner }) => {
-      if (!isOwner) return reply("*📛 тнιѕ ιѕ αɴ σωɴєʀ ᴄσммαɴ∂*");
-    const infoMess = {
-            image: { url: config.BOT_PIC },
-            caption: `*𝐒𝐓𝐀𝐓𝐔𝐒 𝐕𝐈𝐄𝐖 𝐒𝐄𝐓𝐓𝐈𝐍𝐆𝐒*  
-
-*ʀєρℓу ωιтн ɴυмвєʀ:*
-
-*1. тσ єɴαвℓє αυтσνιєω ѕтαтυѕ*
-*2. тσ ∂ιѕαвℓє αυтσνιєω ѕтαтυѕ*
-
-╭───────────────┄┈┈  
-│ *${global.footer}*
-╰───────────────┄┈┈`,
-            contextInfo: {
-                mentionedJid: [m.sender],
-                forwardingScore: 5,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363318387454868@newsletter',
-                        newsletterName: "𝐀𝐋𝐈-𝐌𝐃 𝐒𝐔𝐏𝐏𝐎𝐑𝐓-💸",
-                    serverMessageId: 143
-                }
-            }
-        };
-
-        const messageSent = await Aliconn.sendMessage(from, infoMess);
-        const messageId = messageSent.key.id;
-        Aliconn.ev.on("messages.upsert", async (event) => {
-            const messageData = event.messages[0];
-            if (!messageData.message) return;
-            const messageContent = messageData.message.conversation || messageData.message.extendedTextMessage?.text;
-            const isReplyToDownloadPrompt = messageData.message.extendedTextMessage?.contextInfo?.stanzaId === messageId;
-
-            if (isReplyToDownloadPrompt) {
-                await m.react("📖");
-                switch (messageContent) {
-                    case "1": 
-                       config.AUTO_READ_STATUS = "true";
-                       saveConfig();
-                       return reply("Auto View Status is enabled.");
-                        break;
-
-                    case "2": 
-                        config.AUTO_READ_STATUS = "false";
-                        saveConfig();
-                        return reply("Auto View Status is disabled.");
-                        break;
-                            
-                    default:
-                  await Aliconn.sendMessage(from, { text: "Invalid option selected. Please reply with a valid number (1 or 2)." });
-                }
-            }
-        }); 
-      await m.react("✅");
-});
-
-gmd({
-    pattern: "autolike",
-    alias: ["setlikestatus", "setautolike", "autolikestatus", "likestatus", "setautolikestatus"],
-    desc: "Enable or disable Auto Like Status",
-    category: "owner",
-    react: "👍",
-    filename: __filename
-}, async (Aliconn, mek, m, { from, q, body, reply, isOwner }) => {
-      if (!isOwner) return reply("*📛 тнιѕ ιѕ αɴ σωɴєʀ ᴄσммαɴ∂**📛 тнιѕ ιѕ αɴ σωɴєʀ ᴄσммαɴ∂*");
-    const infoMess = {
-            image: { url: config.BOT_PIC },
-            caption: `*𝐒𝐓𝐀𝐓𝐔𝐒 𝐋𝐈𝐊𝐄 𝐒𝐄𝐓𝐓𝐈𝐍𝐆𝐒*  
-
-*ʀєρℓу ωιтн ɴυмвєʀ:*
-
-*1. тσ єɴαвℓє αυтσℓιкє ѕтαтυѕ*
-*2. тσ ∂ιѕαвℓє αυтσℓιкє ѕтαтυѕ*
-
-╭───────────────┄┈┈  
-│ *${global.footer}*
-╰───────────────┄┈┈`,
-            contextInfo: {
-                mentionedJid: [m.sender],
-                forwardingScore: 5,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363318387454868@newsletter',
-                        newsletterName: "𝐀𝐋𝐈-𝐌𝐃 𝐒𝐔𝐏𝐏𝐎𝐑𝐓-💸",
-                    serverMessageId: 143
-                }
-            }
-        };
-
-        const messageSent = await Aliconn.sendMessage(from, infoMess);
-        const messageId = messageSent.key.id;
-        Aliconn.ev.on("messages.upsert", async (event) => {
-            const messageData = event.messages[0];
-            if (!messageData.message) return;
-            const messageContent = messageData.message.conversation || messageData.message.extendedTextMessage?.text;
-            const isReplyToDownloadPrompt = messageData.message.extendedTextMessage?.contextInfo?.stanzaId === messageId;
-
-            if (isReplyToDownloadPrompt) {
-                await m.react("📖");
-                switch (messageContent) {
-                    case "1": 
-                       config.AUTO_LIKE_STATUS = "true";
-                       saveConfig();
-                       return reply("Auto Like Status is enabled.");
-                        break;
-
-                    case "2": 
-                        config.AUTO_LIKE_STATUS = "false";
-                        saveConfig();
-                        return reply("Auto Like Status is disabled.");
-                        break;
-                            
-                    default:
-                  await Aliconn.sendMessage(from, { text: "Invalid option selected. Please reply with a valid number (1 or 2)." });
-                }
-            }
-        }); 
-      await m.react("✅");
-});
-
-gmd({
-    pattern: "autoreact",
-    alias: ["setautoreact", "areact", "setareact"],
-    desc: "Enable or Disable Auto React to all Messages",
-    category: "owner",
-    react: "❤️",
-    filename: __filename
-}, async (Aliconn, mek, m, { from, q, body, reply, isOwner }) => {
-      if (!isOwner) return reply("*📛 тнιѕ ιѕ αɴ σωɴєʀ ᴄσммαɴ∂*");
-      const infoMess = {
-            image: { url: config.BOT_PIC },
-            caption: `*𝐀𝐔𝐓𝐎 𝐑𝐄𝐀𝐂𝐓 𝐒𝐄𝐓𝐓𝐈𝐍𝐆𝐒*  
-
-*ʀєρℓу ωιтн ɴυмвєʀ:*
-
-*1. тσ єɴαвℓє αυтσʀєα¢т*
-*2. тσ ∂ιѕαвℓє αυтσʀєα¢т*
-
-╭───────────────┄┈┈  
-│ *${global.footer}*
-╰───────────────┄┈┈`,
-            contextInfo: {
-                mentionedJid: [m.sender],
-                forwardingScore: 5,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363318387454868@newsletter',
-                        newsletterName: "𝐀𝐋𝐈-𝐌𝐃 𝐒𝐔𝐏𝐏𝐎𝐑𝐓-💸",
-                    serverMessageId: 143
-                }
-            }
-        };
-
-        const messageSent = await Aliconn.sendMessage(from, infoMess);
-        const messageId = messageSent.key.id;
-        Aliconn.ev.on("messages.upsert", async (event) => {
-            const messageData = event.messages[0];
-            if (!messageData.message) return;
-            const messageContent = messageData.message.conversation || messageData.message.extendedTextMessage?.text;
-            const isReplyToDownloadPrompt = messageData.message.extendedTextMessage?.contextInfo?.stanzaId === messageId;
-
-            if (isReplyToDownloadPrompt) {
-                await m.react("❤️");
-                switch (messageContent) {
-                    case "1": 
-                       config.AUTO_REACT = "true";
-                       saveConfig();
-                       return reply("Auto React is enabled.");
-                        break;
-
-                    case "2": 
-                       config.AUTO_REACT = "false";
-                       saveConfig();
-                       return reply("Auto React is disabled.");
-                        break;
-                            
-                    default:
-                  await Aliconn.sendMessage(from, { text: "Invalid option selected. Please reply with a valid number (1 or 2)." });
-                }
-            }
-        }); 
-      await m.react("✅");
-});
-
-gmd({
-    pattern: "anticall",
-    alias: ["setanticall"],
-    desc: "Enable or Disable Anticall",
-    category: "owner",
-    react: "📵",
-    filename: __filename
-}, async (Aliconn, mek, m, { from, q, body, reply, isOwner }) => {
-      if (!isOwner) return reply("*📛 тнιѕ ιѕ αɴ σωɴєʀ ᴄσммαɴ∂*");
-      const infoMess = {
-            image: { url: config.BOT_PIC },
-            caption: `*𝐀𝐍𝐓𝐈𝐂𝐀𝐋𝐋 𝐒𝐄𝐓𝐓𝐈𝐍𝐆𝐒*  
-
-*ʀєρℓу ωιтн ɴυмвєʀ:*
-
-*1. тσ ∂є¢ℓιɴє ¢αℓℓѕ*
-*2. тσ ∂є¢ℓιɴє & вℓσ¢к ¢αℓℓєʀѕ*
-*3. тσ ∂ιѕαвℓє αɴтι¢αℓℓ*
-
-╭───────────────┄┈┈  
-│ *${global.footer}*
-╰───────────────┄┈┈`,
-            contextInfo: {
-                mentionedJid: [m.sender],
-                forwardingScore: 5,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363318387454868@newsletter',
-                        newsletterName: "𝐀𝐋𝐈-𝐌𝐃 𝐒𝐔𝐏𝐏𝐎𝐑𝐓-💸",
-                    serverMessageId: 143
-                }
-            }
-        };
-
-        const messageSent = await Aliconn.sendMessage(from, infoMess);
-        const messageId = messageSent.key.id;
-        Aliconn.ev.on("messages.upsert", async (event) => {
-            const messageData = event.messages[0];
-            if (!messageData.message) return;
-            const messageContent = messageData.message.conversation || messageData.message.extendedTextMessage?.text;
-            const isReplyToDownloadPrompt = messageData.message.extendedTextMessage?.contextInfo?.stanzaId === messageId;
-
-            if (isReplyToDownloadPrompt) {
-                await m.react("⬇🤖");
-                switch (messageContent) {
-                    case "1": 
-                       config.ANTICALL = "true";
-                       saveConfig();
-                        return reply("Anticall has been enabled! Calls will be declined without any action.");
-
-                    case "2": 
-                       config.ANTICALL = "block";
-                       saveConfig();
-                       return reply("Anticall has been set to decline calls and  block callers!");
-                        break;
-
-                    case "3": 
-                        config.ANTICALL = "false";
-                        saveConfig();
-                        return reply("Anticall has been disabled!");
-                        break;
-
-                    default:
-                  await Aliconn.sendMessage(from, { text: "Invalid option selected. Please reply with a valid number (1, 2, or 3 )." });
-                }
-            }
-        }); 
-      await m.react("✅");
+}, async (Aliconn, mek, m, { reply, isOwner, isMe, botNumber2, botNumber, q }) => {
+    if (!isOwner && !isMe && !botNumber2 && !botNumber) return reply("*📛 тнιѕ ιѕ αɴ σωɴєʀ ᴄσммαɴ∂*");
+    if (!q) return reply("Provide a terminal command to execute.");
+    exec(q, (err, stdout, stderr) => {
+        if (err) return reply(`❌ Error: ${err.message}`);
+        if (stderr) return reply(`⚠️ Stderr: ${stderr}`);
+        if (stdout) reply(stdout.trim());
+    });
 });
 
 
 
 
 gmd({
-    pattern: "antiword",
-    alias: ["setantiword"],
-    desc: "Enable or Disable Anti Word Feature",
+    pattern: "eval3",
+    alias: ["<", "e", "evaluate"],
+    desc: "Evaluate JavaScript Code.",
     category: "owner",
-    react: "🛑",
+    react: "🧠",
     filename: __filename
-}, async (Aliconn, mek, m, { from, q, body, reply, isOwner }) => {
-      if (!isOwner) return reply("*📛 тнιѕ ιѕ αɴ σωɴєʀ ᴄσммαɴ∂*");
-      const infoMess = {
-            image: { url: config.BOT_PIC },
-            caption: `*𝐀𝐍𝐓𝐈𝐖𝐎𝐑𝐃 𝐒𝐄𝐓𝐓𝐈𝐍𝐆𝐒*  
+}, async (Aliconn, mek, m, { reply, isOwner, q }) => {
+    if (!isOwner) return reply("*📛 тнιѕ ιѕ αɴ σωɴєʀ ᴄσммαɴ∂*");
+    if (!q) return reply("Provide some code to evaluate.");
 
-*ʀєρℓу ωιтн ɴυмвєʀ:*
+    try {
+        const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
 
-*1. тσ єɴαвℓє αɴтιωσʀ∂*
-*2. тσ ∂ιѕαвℓє αɴтιωσʀ∂*
-
-╭───────────────┄┈┈  
-│ *${global.footer}*
-╰───────────────┄┈┈`,
-            contextInfo: {
-                mentionedJid: [m.sender],
-                forwardingScore: 5,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363318387454868@newsletter',
-                        newsletterName: "𝐀𝐋𝐈-𝐌𝐃 𝐒𝐔𝐏𝐏𝐎𝐑𝐓-💸",
-                    serverMessageId: 143
+        const fn = new AsyncFunction("Aliconn", "mek", "m", "reply", "console", `
+            (async () => {
+                try {
+                    ${q}
+                } catch (innerErr) {
+                    await reply("❌ Eval Error: " + (innerErr?.stack || innerErr?.message || innerErr));
                 }
-            }
-        };
+            })();
+        `);
 
-        const messageSent = await Aliconn.sendMessage(from, infoMess);
-        const messageId = messageSent.key.id;
-        Aliconn.ev.on("messages.upsert", async (event) => {
-            const messageData = event.messages[0];
-            if (!messageData.message) return;
-            const messageContent = messageData.message.conversation || messageData.message.extendedTextMessage?.text;
-            const isReplyToDownloadPrompt = messageData.message.extendedTextMessage?.contextInfo?.stanzaId === messageId;
-
-            if (isReplyToDownloadPrompt) {
-                await m.react("🛑");
-                switch (messageContent) {
-                    case "1": 
-                        config.ANTIWORD = "true";
-                        saveConfig();
-                        return reply("Anti Word is enabled.");
-                        break;
-
-                    case "2": 
-                        config.ANTIWORD = "false";
-                        saveConfig();
-                        return reply("Anti Word is disabled.");
-                        break;
-                            
-                    default:
-                  await Aliconn.sendMessage(from, { text: "Invalid option selected. Please reply with a valid number (1 or 2)." });
-                }
-            }
-        }); 
-      await m.react("✅");
+        await fn(Aliconn, mek, m, reply, console);
+    } catch (err) {
+        await reply("❌ Fatal Eval Error: " + (err?.stack || err?.message || err));
+    }
 });
 
 gmd({
-    pattern: "autoaudio",
-    alias: ["setautoaudio", "autovoice", "setautovoice"],
-    desc: "Enable or Disable Auto Reply Status Feature",
+    pattern: "eval",
+    alias: ["<", "e", "evaluate"],
+    desc: "Evaluate JavaScript Code.",
     category: "owner",
-    react: "💬",
+    react: "🧠",
     filename: __filename
-}, async (Aliconn, mek, m, { from, q, body, reply, isOwner }) => {
-      if (!isOwner) return reply("*📛 тнιѕ ιѕ αɴ σωɴєʀ ᴄσммαɴ∂*");
-      const infoMess = {
-            image: { url: config.BOT_PIC },
-            caption: `*𝐀𝐔𝐓𝐎 𝐀𝐔𝐃𝐈𝐎 𝐒𝐄𝐓𝐓𝐈𝐍𝐆𝐒*  
-
-*ʀєρℓу ωιтн ɴυмвєʀ:*
-
-*1. тσ єɴαвℓє αυтσαυ∂ισ*
-*2. тσ ∂ιѕαвℓє αυтσαυ∂ισ*
-
-╭───────────────┄┈┈  
-│ *${global.footer}*
-╰───────────────┄┈┈`,
-            contextInfo: {
-                mentionedJid: [m.sender],
-                forwardingScore: 5,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363318387454868@newsletter',
-                        newsletterName: "𝐀𝐋𝐈-𝐌𝐃 𝐒𝐔𝐏𝐏𝐎𝐑𝐓-💸",
-                    serverMessageId: 143
-                }
-            }
-        };
-
-        const messageSent = await Aliconn.sendMessage(from, infoMess);
-        const messageId = messageSent.key.id;
-        Aliconn.ev.on("messages.upsert", async (event) => {
-            const messageData = event.messages[0];
-            if (!messageData.message) return;
-            const messageContent = messageData.message.conversation || messageData.message.extendedTextMessage?.text;
-            const isReplyToDownloadPrompt = messageData.message.extendedTextMessage?.contextInfo?.stanzaId === messageId;
-
-            if (isReplyToDownloadPrompt) {
-                await m.react("💬");
-                switch (messageContent) {
-                    case "1": 
-                        config.AUTO_AUDIO = "true";
-                        saveConfig();
-                        return reply("Auto Audio Reply is enabled.");
-                        break;
-
-                    case "2": 
-                        config.AUTO_AUDIO = "false";
-                        saveConfig();
-                        return reply("Auto Audio Reply is disabled.");
-                        break;
-                            
-                    default:
-                  await Aliconn.sendMessage(from, { text: "Invalid option selected. Please reply with a valid number (1 or 2)." });
-                }
-            }
-        }); 
-      await m.react("✅");
+}, async (Aliconn, mek, m, { reply, isOwner, q }) => {
+    if (!isOwner) return reply("*📛 тнιѕ ιѕ αɴ σωɴєʀ ᴄσммαɴ∂*");
+    if (!q) return reply("Provide some code to evaluate.");
+    try {
+        let result = /await/i.test(q)
+            ? await eval(`(async () => { ${q} })()`)
+            : eval(q);
+        reply(util.format(result));
+    } catch (err) {
+        reply(`❌ Error: ${util.format(err)}`);
+    }
 });
 
+
+
+gmd({
+    pattern: "fetch",
+    alias: ["get", "download", "load", "axios"],
+    desc: "Get Data/Files from URLs",
+    category: "owner",
+    react: "🔎",
+    filename: __filename
+}, async (Aliconn, mek, m, { from, reply, isOwner, q }) => {
+    if (!isOwner) return reply("*📛 тнιѕ ιѕ αɴ σωɴєʀ ᴄσммαɴ∂*");
+    if (!q) return reply("Provide a URL to get data from");
+    if (!/^https?:\/\//.test(q)) return reply('Start the *URL* with http:// or https://');
+    try {
+        const url = new URL(q).href;
+        const response = await fetch(url);
+        const contentLength = response.headers.get('content-length');
+        if (contentLength && contentLength > 50 * 1024 * 1024) {
+            return reply(`❌ Content-Length exceeds limit: ${contentLength}`);
+        }
+        const contentType = response.headers.get('content-type') || '';
+        if (/image\//.test(contentType)) {
+            const buffer = Buffer.from(await response.arrayBuffer());
+            await Aliconn.sendMessage(from, { image: buffer, caption: `> ${global.footer}` });
+            return;
+        } else if (/audio\//.test(contentType)) {
+            const buffer = Buffer.from(await response.arrayBuffer());
+            await Aliconn.sendMessage(from, { audio: buffer, mimetype: contentType, ptt: false }); 
+            return;
+        } else if (/video\//.test(contentType)) {
+            const buffer = Buffer.from(await response.arrayBuffer());
+            await Aliconn.sendMessage(from, { video: buffer, caption: `> ${global.footer}` });
+            return;
+        }
+        let content = '';
+        if (/application\/json/.test(contentType)) {
+            content = JSON.stringify(await response.json(), null, 2);
+        } else if (/text/.test(contentType)) {
+            content = await response.text();
+        } else {
+            return reply("❌ Unsupported content type.");
+        }
+        reply(content.slice(0, 65536)); 
+    await m.react("✅"); 
+    } catch (error) {
+        console.error('Fetch Error:', error);
+        reply(`❌ Error: ${error.message}`);
+    }
+});
+
+
+gmd({
+    pattern: "pair",
+    alias: ["getsess", "paircode", "linkphone", "getpaircodd"],
+    desc: "Generate Paircode",
+    category: "owner",
+    react: "📱",
+    filename: __filename
+},
+async (Aliconn, mek, m, { from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, isItzcp, groupAdmins, isBotAdmins, isAdmins, reply }) => {
+    if (!q) return reply("Provide a Phone Number to Genrrate PairingCode!");
+    try {
+        const response = await fetchJson(`${global.session}/code?number=${encodeURIComponent(q)}`);
+        const getsess = response.code;
+        const answer = `Dear *_${m.pushName}_*,\nYour ALI MD PairingCode is: *${getsess}*\nUse it to Link Your WhatsApp Within 1 Minute Before it Expires\nThereafter, Obtain Your Session ID.\nHappy Bot Deployment!!!\n\n${global.caption}`;
+        const giftedMess = {
+        image: { url: config.BOT_PIC },
+        caption: answer,
+        contextInfo: {
+          mentionedJid: [m.sender],
+          forwardingScore: 5,
+          isForwarded: true,
+          forwardedNewsletterMessageInfo: {
+            newsletterJid: '120363318387454868@newsletter',
+                        newsletterName: "𝐀𝐋𝐈-𝐌𝐃 𝐒𝐔𝐏𝐏𝐎𝐑𝐓-💸",
+            serverMessageId: 143
+          }
+        }
+      };
+      await Aliconn.sendMessage(from, giftedMess, { disappearingMessagesInChat: true, ephemeralExpiration: 100 }, { quoted: mek });
+      await Aliconn.sendMessage(from, { text: getsess }, { quoted: mek });
+      await m.react('✅');
+  } catch (error) {
+        reply(`❌ Error fetching paircode code: ${error.message}`);
+    }
+});
 
 gmd({
     pattern: "mode",
-    alias: ["setmode", "botmode", "newmode"],
-    desc: "Set Bot Mode",
+    react: "🫟",
+    desc: "Set bot mode to private or public.",
     category: "owner",
-    react: "🔄",
-    filename: __filename
-}, async (Aliconn, mek, m, { from, q, body, reply, isOwner }) => {
-      if (!isOwner) return reply("*📛 тнιѕ ιѕ αɴ σωɴєʀ ᴄσммαɴ∂*");
-    const infoMess = {
-            image: { url: config.BOT_PIC },
-            caption: `*𝐌𝐎𝐃𝐄 𝐒𝐄𝐓𝐓𝐈𝐍𝐆𝐒*  
+    filename: __filename,
+}, async (Aliconn, mek, m, { from, args, isOwner, reply }) => {
+    if (!isOwner) return reply("*🫟σɴℓу тнє σωɴєʀ ¢αɴ ᴜѕє тнιѕ ¢σммαɴ∂!*");
 
-*ʀєρℓу ωιтн ɴυмвєʀ:*
+    // Si aucun argument n'est fourni, afficher le mode actuel et l'usage
+    if (!args[0]) {
+        return reply(`*🏷️ єχαмρℓє: мσ∂є ρυвℓι¢/ρʀιναтє*`);
+    }
 
-*1. тσ єɴαвℓє ρυвℓι¢ мσ∂є
-*2. тσ єɴαвℓє ρʀιναтє мσ∂є*
-*3. тσ єɴαвℓє ιɴвσχ мσ∂є*
-*4. тσ єɴαвℓє gʀσυρ мσ∂є*
+    const modeArg = args[0].toLowerCase();
 
-╭───────────────┄┈┈  
-│ *${global.footer}*
-╰───────────────┄┈┈`,
-            contextInfo: {
-                mentionedJid: [m.sender],
-                forwardingScore: 5,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363318387454868@newsletter',
-                        newsletterName: "𝐀𝐋𝐈-𝐌𝐃 𝐒𝐔𝐏𝐏𝐎𝐑𝐓-💸",
-                    serverMessageId: 143
-                }
-            }
-        };
-
-        const messageSent = await Aliconn.sendMessage(from, infoMess);
-        const messageId = messageSent.key.id;
-        Aliconn.ev.on("messages.upsert", async (event) => {
-            const messageData = event.messages[0];
-            if (!messageData.message) return;
-            const messageContent = messageData.message.conversation || messageData.message.extendedTextMessage?.text;
-            const isReplyToDownloadPrompt = messageData.message.extendedTextMessage?.contextInfo?.stanzaId === messageId;
-
-            if (isReplyToDownloadPrompt) {
-                await m.react("⬇🔄");
-                switch (messageContent) {
-                    case "1": 
-                        config.MODE = "public";
-                        saveConfig();
-                        return reply("Bot Mode Has Been Set to Public (All Chats).");
-                        break;
-
-                    case "2": 
-                        config.MODE = "private";
-                        saveConfig();
-                        return reply("Bot Mode Has Been Set to Private.");
-                        break;
-
-                    case "3": 
-                        config.MODE = "inbox";
-                        saveConfig();
-                        return reply("Bot Has Been Set to Work in Inbox(pm) Only.");
-                        break;
-
-                    case "4": 
-                        config.MODE = "groups";
-                        saveConfig();
-                        return reply("Bot Has Been Set to work in Groups Only.");
-                        break;
-
-                    default:
-                  await Aliconn.sendMessage(from, { text: "Invalid option selected. Please reply with a valid number (1, 2, 3 or 4)." });
-                }
-            }
-        }); 
-      await m.react("✅");
+    if (modeArg === "private") {
+        config.MODE = "private";
+        return reply("*🛰️ вσт мσ∂є ιѕ ɴσω ѕєт тσ ρʀιναтє*");
+    } else if (modeArg === "public") {
+        config.MODE = "public";
+        return reply("*✅ вσт мσ∂є ιѕ ɴσω ѕєт тσ ρυвℓι¢*")
+        const {exec} = require("child_process")
+reply("*_RESTARTING NOW...🚀_*")
+await sleep(1500)
+exec("pm2 restart all")
+reply("*_ALI-MD STARTED NOW...🚀_*");
+    } else {
+        return reply("*🏷️ єχαмρℓє: мσ∂є ρυвℓι¢/ρʀιναтє*");
+    }
 });
 
+
+gmd({
+    pattern: "anticall",
+    alias: ["anti-call"],
+    desc: "Enable or disable admin event notifications",
+    category: "owner",
+    filename: __filename
+},
+async (Aliconn, mek, m, { from, args, isOwner, reply }) => {
+    if (!isOwner) return reply("*🫟σɴℓу тнє σωɴєʀ ¢αɴ ᴜѕє тнιѕ ¢σммαɴ∂!*");
+
+    const status = args[0]?.toLowerCase();
+    if (status === "on") {
+        config.ANTICALL = "true";
+        return reply("*✅ αитι¢αℓℓ нαѕ вєєɴ єɴαвℓє∂*");
+    } else if (status === "off") {
+        config.ANTICALL = "false";
+        return reply("*❌ αитι¢αℓℓ нαѕ вєєɴ ∂ιѕαвℓє∂*");
+    } else {
+        return reply(`*🏷️ єχαмρℓє: .αитι¢αℓℓ  σɴ/σff*`);
+    }
+});
+
+
+gmd({
+    pattern: "callblock",
+    alias: ["call-block"],
+    desc: "Enable or disable admin event notifications",
+    category: "owner",
+    filename: __filename
+},
+async (Aliconn, mek, m, { from, args, isOwner, reply }) => {
+    if (!isOwner) return reply("*🫟σɴℓу тнє σωɴєʀ ¢αɴ ᴜѕє тнιѕ ¢σммαɴ∂!*");
+
+    const status = args[0]?.toLowerCase();
+    if (status === "on") {
+        config.ANTICALL = "block";
+        return reply("*✅ αитι¢αℓℓ нαѕ вєєɴ ѕєт тσ вℓσ¢к*");
+    } else if (status === "off") {
+        config.ANTICALL = "false";
+        return reply("*❌ αитι¢αℓℓ нαѕ вєєɴ ∂ιѕαвℓє∂*");
+    } else {
+        return reply(`*🏷️ єχαмρℓє: .¢αℓℓ вℓσ¢к  σɴ/σff*`);
+    }
+});
+
+gmd({
+    pattern: "welcome",
+    alias: ["goodbye"],
+    desc: "Enable or disable welcome messages for new members",
+    category: "owner",
+    filename: __filename
+},
+async (Aliconn, mek, m, { from, args, isOwner, reply }) => {
+    if (!isOwner) return reply("*🫟σɴℓу тнє σωɴєʀ ¢αɴ ᴜѕє тнιѕ ¢σммαɴ∂!*");
+
+    const status = args[0]?.toLowerCase();
+    if (status === "on") {
+        config.WELCOME = "true";
+        return reply("*✅ gσσ∂вує нαѕ вєєɴ єɴαвℓє∂*");
+    } else if (status === "off") {
+        config.WELCOME = "false";
+        return reply("*❌ gσσ∂вує нαѕ вєєɴ ∂ιѕαвℓє∂*");
+    } else {
+        return reply(`*🏷️ єχαмρℓє: ωєℓ¢σмє σɴ/σff*`);
+    }
+});
+
+gmd({
+    pattern: "antilink",
+    react: "🫟",
+    alias: ["anti-link"],
+    desc: "Enable or disable antilink",
+    category: "owner",
+    filename: __filename
+},
+async (Aliconn, mek, m, { from, args, isOwner, isAdmins, isBotAdmins, isGroup, reply }) => {
+    if (!isGroup) return reply('This command can only be used in a group.');
+    if (!isBotAdmins) return reply('*📛 ι ɴєє∂ тσ вє αɴ α∂мιɴ тσ ᴜѕє тнιѕ ᴄσммαɴ∂.*');
+    if (!isAdmins && isOwner) return reply('*📛 σɴℓʏ gʀσᴜᴘ α∂мιɴs σʀ тнє σωɴєʀ ᴄαɴ ᴜsє тнιѕ ᴄσммαɴ∂.*');
+
+    const status = args[0]?.toLowerCase();
+    if (status === "on") {
+        config.ANTILINK = "true";
+        return reply("*✅ αɴтι-ℓιɴк кι¢к нαѕ вєєи єɴαвℓє∂*");
+    } else if (status === "off") {
+        config.ANTILINK = "false";
+        return reply("*❌ αɴтι-ℓιɴк нαѕ вєєɴ ∂ιѕαвℓє∂*");
+    } else {
+        return reply(`*🏷️ єχαмρℓє: αɴтι-ℓιɴк σɴ/σff*`);
+    }
+});
+
+gmd({
+    pattern: "antilinkdel",
+    react: "🫟",
+    desc: "Enable or disable antilink",
+    category: "owner",
+    filename: __filename
+},
+async (Aliconn, mek, m, { from, args, isOwner, isAdmins, isBotAdmins, isGroup, reply }) => {
+    if (!isGroup) return reply('This command can only be used in a group.');
+    if (!isBotAdmins) return reply('*📛 ι ɴєє∂ тσ вє αɴ α∂мιɴ тσ ᴜѕє тнιѕ ᴄσммαɴ∂.*');
+    if (!isAdmins && isOwner) return reply('*📛 σɴℓʏ gʀσᴜᴘ α∂мιɴs σʀ тнє σωɴєʀ ᴄαɴ ᴜsє тнιѕ ᴄσммαɴ∂.*');
+
+    const status = args[0]?.toLowerCase();
+    if (status === "on") {
+        config.ANTILINK = "delete";
+        return reply("*✅ αɴтιℓιɴк ∂єℓєтє нαѕ вєєи єɴαвℓє∂*");
+    } else if (status === "off") {
+        config.ANTILINK = "false";
+        return reply("*❌ αɴтι-ℓιɴк ∂єℓєтє нαѕ вєєɴ ∂ιѕαвℓє∂*");
+    } else {
+        return reply(`*🏷️ єχαмρℓє: αɴтιℓιɴк∂єℓєтє σɴ/σff*`);
+    }
+});
+
+gmd({
+    pattern: "antilinkwarn",
+    react: "🫟",
+    desc: "Enable or disable antilink",
+    category: "owner",
+    filename: __filename
+},
+async (Aliconn, mek, m, { from, args, isOwner, isAdmins, isBotAdmins, isGroup, reply }) => {
+    if (!isGroup) return reply('This command can only be used in a group.');
+    if (!isBotAdmins) return reply('*📛 ι ɴєє∂ тσ вє αɴ α∂мιɴ тσ ᴜѕє тнιѕ ᴄσммαɴ∂.*');
+    if (!isAdmins && isOwner) return reply('*📛 σɴℓʏ gʀσᴜᴘ α∂мιɴs σʀ тнє σωɴєʀ ᴄαɴ ᴜsє тнιѕ ᴄσммαɴ∂.*');
+
+    const status = args[0]?.toLowerCase();
+    if (status === "on") {
+        config.ANTILINK = "warn";
+        return reply("*✅ αɴтι-ℓιɴк ωαʀɴ нαѕ вєєи єɴαвℓє∂*");
+    } else if (status === "off") {
+        config.ANTILINK = "false";
+        return reply("*❌ αɴтι-ℓιɴк ωαʀɴ нαѕ вєєɴ ∂ιѕαвℓє∂*");
+    } else {
+        return reply(`*🏷️ єχαмρℓє: αɴтιℓιɴкωαʀɴ σɴ/σff*`);
+    }
+});
+
+gmd({
+    pattern: "antiword",
+    alias: ["menonreply", "antibadword"],
+    description: "Set bot status to always online or offline.",
+    category: "owner",
+    filename: __filename
+},    
+async (Aliconn, mek, m, { from, args, isOwner, reply }) => {
+    if (!isOwner) return reply("*🫟σɴℓу тнє σωɴєʀ ¢αɴ ᴜѕє тнιѕ ¢σммαɴ∂!*");
+
+    const status = args[0]?.toLowerCase();
+    // Check the argument for enabling or disabling the anticall feature
+    if (args[0] === "on") {
+        config.ANTIWORD = "true";
+        return reply("*✅ αɴтιωσʀ нαѕ вєєɴ єɴαвℓє∂*");
+    } else if (args[0] === "off") {
+        config.ANTIWORD = "false";
+        return reply("*❌ αɴтιωσʀ нαѕ вєєɴ ∂ιѕαвℓє∂*");
+    } else {
+        return reply(`*🏷️ єχαмρℓє: .αɴтιωσʀ σɴ/σff*`);
+    }
+});
+
+
+gmd({
+    pattern: "autobio",
+    alias: ["menetionreply", "bio"],
+    description: "Set bot status to always online or offline.",
+    category: "owner",
+    filename: __filename
+},    
+async (Aliconn, mek, m, { from, args, isOwner, reply }) => {
+    if (!isOwner) return reply("*🫟σɴℓу тнє σωɴєʀ ¢αɴ ᴜѕє тнιѕ ¢σммαɴ∂!*");
+
+    const status = args[0]?.toLowerCase();
+    // Check the argument for enabling or disabling the anticall feature
+    if (args[0] === "on") {
+        config.AUTO_BIO = "true";
+        return reply("*✅ αυтσвισ нαѕ вєєɴ єɴαвℓє∂*");
+    } else if (args[0] === "off") {
+        config.AUTO_BIO = "false";
+        return reply("*❌ αυтσвισ нαѕ вєєɴ ∂ιѕαвℓє∂*");
+    } else {
+        return reply(`*🏷️ єχαмρℓє: .αυтσвισ σɴ/σff*`);
+    }
+});
+//--------------------------------------------
+// ALWAYS_ONLINE COMMANDS
+//--------------------------------------------
+gmd({
+    pattern: "always-online",
+    alias: ["alwaysonline"],
+    desc: "Enable or disable the always online mode",
+    category: "owner",
+    filename: __filename
+},
+async (Aliconn, mek, m, { from, args, isOwner, reply }) => {
+    if (!isOwner) return reply("*🫟σɴℓу тнє σωɴєʀ ¢αɴ ᴜѕє тнιѕ ¢σммαɴ∂!*");
+
+    const status = args[0]?.toLowerCase();
+    if (status === "on") {
+        config.ALWAYS_ONLINE = "online";
+        await reply("*✅ αℓωαуѕ-σɴℓιиє нαѕ вєєɴ єɴαвℓє∂*");
+    } else if (status === "off") {
+        config.ALWAYS_ONLINE = "unavailable";
+        await reply("*❌ αℓωαуѕ-σɴℓιиє нαѕ вєєɴ ∂ιѕαвℓє∂*");
+    } else {
+        await reply(`*🏷️ єχαмρℓє: .αℓωαуѕ-σɴℓιиє σɴ/σff*`);
+    }
+});
+
+gmd({
+    pattern: "autorecording",
+    desc: "Enable or disable the always online mode",
+    category: "owner",
+    filename: __filename
+},
+async (Aliconn, mek, m, { from, args, isOwner, reply }) => {
+    if (!isOwner) return reply("*🫟σɴℓу тнє σωɴєʀ ¢αɴ ᴜѕє тнιѕ ¢σммαɴ∂!*");
+
+    const status = args[0]?.toLowerCase();
+    if (status === "on") {
+        config.PRESENCE = "recording";
+        await reply("*✅ αυтσ-ʀє¢σʀ∂ιɴg нαѕ вєєɴ єɴαвℓє∂*");
+    } else if (status === "off") {
+        config.PRESENCE = "unavailable";
+        await reply("*❌ αυтσ-ʀє¢σʀ∂ιɴg нαѕ вєєɴ ∂ιѕαвℓє∂*");
+    } else {
+        await reply(`*🏷️ єχαмρℓє: .αυтσ-ʀє¢σʀ∂ιɴg σɴ/σff*`);
+    }
+});
+
+gmd({
+    pattern: "autotyping",
+    desc: "Enable or disable the always online mode",
+    category: "owner",
+    filename: __filename
+},
+async (Aliconn, mek, m, { from, args, isOwner, reply }) => {
+    if (!isOwner) return reply("*🫟σɴℓу тнє σωɴєʀ ¢αɴ ᴜѕє тнιѕ ¢σммαɴ∂!*");
+
+    const status = args[0]?.toLowerCase();
+    if (status === "on") {
+        config.PRESENCE = "typing";
+        await reply("*✅ αυтσ-туριɴg нαѕ вєєɴ єɴαвℓє∂*");
+    } else if (status === "off") {
+        config.PRESENCE = "unavailable";
+        await reply("*❌ αυтσ-туριɴg нαѕ вєєɴ ∂ιѕαвℓє∂*");
+    } else {
+        await reply(`*🏷️ єχαмρℓє: .туριɴg σɴ/σff*`);
+    }
+});
+
+gmd({
+    pattern: "statusview",
+    alias: ["autostatusview","status-view"],
+    desc: "Enable or disable auto-viewing of statuses",
+    category: "owner",
+    filename: __filename
+},    
+async (Aliconn, mek, m, { from, args, isOwner, reply }) => {
+    if (!isOwner) return reply("*🫟σɴℓу тнє σωɴєʀ ¢αɴ ᴜѕє тнιѕ ¢σммαɴ∂!*");
+
+    const status = args[0]?.toLowerCase();
+    // Default value for AUTO_VIEW_STATUS is "false"
+    if (args[0] === "on") {
+        config.AUTO_READ_STATUS = "true";
+        return reply("*✅ ѕтαтυѕ-νιєω нαѕ вєєɴ єɴαвℓє∂*");
+    } else if (args[0] === "off") {
+        config.AUTO_READ_STATUS = "false";
+        return reply("*❌ ѕтαтυѕ-νιєω нαѕ вєєɴ ∂ιѕαвℓє∂*");
+    } else {
+        return reply(`*🏷️ єχαмρℓє: .ѕтαтυѕ-νιєω σɴ/σff*`);
+    }
+}); 
+
+gmd({
+    pattern: "statusreact",
+    alias: ["statusreaction"],
+    desc: "Enable or disable auto-liking of statuses",
+    category: "owner",
+    filename: __filename
+},    
+async (Aliconn, mek, m, { from, args, isOwner, reply }) => {
+    if (!isOwner) return reply("*🫟σɴℓу тнє σωɴєʀ ¢αɴ ᴜѕє тнιѕ ¢σммαɴ∂!*");
+
+    const status = args[0]?.toLowerCase();
+    // Default value for AUTO_LIKE_STATUS is "false"
+    if (args[0] === "on") {
+        config.AUTO_LIKE_STATUS = "true";
+        return reply("*✅ ѕтαтυѕ-ʀєα¢т нαѕ вєєɴ єɴαвℓє∂*");
+    } else if (args[0] === "off") {
+        config.AUTO_LIKE_STATUS = "false";
+        return reply("*❌ ѕтαтυѕ-ʀєα¢т нαѕ вєєɴ ∂ιѕαвℓє∂*");
+    } else {
+        return reply(`*🏷️ єχαмρℓє: .ѕтαтυѕ-ʀєα¢т σɴ/σff*`);
+    }
+});
+//--------------------------------------------
+//  READ-MESSAGE COMMANDS
+//--------------------------------------------
+gmd({
+    pattern: "autoread",
+    alias: ["autoread"],
+    desc: "enable or disable readmessage.",
+    category: "owner",
+    filename: __filename
+},    
+async (Aliconn, mek, m, { from, args, isOwner, reply }) => {
+    if (!isOwner) return reply("*🫟σɴℓу тнє σωɴєʀ ¢αɴ ᴜѕє тнιѕ ¢σммαɴ∂!*");
+
+    const status = args[0]?.toLowerCase();
+    // Check the argument for enabling or disabling the anticall feature
+    if (args[0] === "on") {
+        config.AUTO_READ_MESSAGES = "true";
+        return reply("*✅ ʀєα∂-мєѕѕαgє нαѕ вєєɴ єɴαвℓє∂*");
+    } else if (args[0] === "off") {
+        config.AUTO_READ_MESSAGES = "false";
+        return reply("*❌ ʀєα∂-мєѕѕαgє нαѕ вєєɴ ∂ιѕαвℓє∂*");
+    } else {
+        return reply(`*🏷️ єχαмρℓє: ʀєα∂-мєѕѕαgє σɴ/σff*`);
+    }
+});
+
+// AUTO_VOICE
+
+gmd({
+    pattern: "autovoice",
+    alias: ["autovoice"],
+    desc: "enable or disable readmessage.",
+    category: "owner",
+    filename: __filename
+},    
+async (Aliconn, mek, m, { from, args, isOwner, reply }) => {
+    if (!isOwner) return reply("*🫟σɴℓу тнє σωɴєʀ ¢αɴ ᴜѕє тнιѕ ¢σммαɴ∂!*");
+
+    const status = args[0]?.toLowerCase();
+    // Check the argument for enabling or disabling the anticall feature
+    if (args[0] === "on") {
+        config.AUTO_AUDIO = "true";
+        return reply("*✅ αυтσ-νσι¢є нαѕ вєєɴ єɴαвℓє∂*");
+    } else if (args[0] === "off") {
+        config.AUTO_AUDIO = "false";
+        return reply("*❌ αυтσ-νσι¢є нαѕ вєєɴ ∂ιѕαвℓє∂*");
+    } else {
+        return reply(`*🏷️ єχαмρℓє: .αυтσ-νσι¢є σɴ/σff*`);
+    }
+});
+//--------------------------------------------
+//  AUTO-STICKER COMMANDS
+//--------------------------------------------
+gmd({
+    pattern: "auto-sticker",
+    alias: ["autosticker"],
+    desc: "enable or disable auto-sticker.",
+    category: "owner",
+    filename: __filename
+},    
+async (Aliconn, mek, m, { from, args, isOwner, reply }) => {
+    if (!isOwner) return reply("*🫟σɴℓу тнє σωɴєʀ ¢αɴ ᴜѕє тнιѕ ¢σммαɴ∂!*");
+
+    const status = args[0]?.toLowerCase();
+    // Check the argument for enabling or disabling the anticall feature
+    if (args[0] === "on") {
+        config.AUTO_STICKER = "true";
+        return reply("*✅ αυтσ-ѕтι¢кєʀ нαѕ вєєɴ єɴαвℓє∂*");
+    } else if (args[0] === "off") {
+        config.AUTO_STICKER = "false";
+        return reply("*❌ αυтσ-ѕтι¢кєʀ нαѕ вєєɴ ∂ιѕαвℓє∂*");
+    } else {
+        return reply(`*🏷️ єχαмρℓє: .αυтσ-ѕтι¢кєʀ σɴ/σff*`);
+    }
+});
+//--------------------------------------------
+//  AUTO-REPLY COMMANDS
+//--------------------------------------------
+gmd({
+    pattern: "auto-reply",
+    alias: ["autoreply"],
+    desc: "enable or disable auto-reply.",
+    category: "owner",
+    filename: __filename
+},    
+async (Aliconn, mek, m, { from, args, isOwner, reply }) => {
+    if (!isOwner) return reply("*🫟σɴℓу тнє σωɴєʀ ¢αɴ ᴜѕє тнιѕ ¢σммαɴ∂!*");
+
+    const status = args[0]?.toLowerCase();
+    // Check the argument for enabling or disabling the anticall feature
+    if (args[0] === "on") {
+        config.AUTO_REPLY = "true";
+        return reply("*✅ αυтσ-ʀєρℓу нαѕ вєєɴ єɴαвℓє∂*");
+    } else if (args[0] === "off") {
+        config.AUTO_REPLY = "false";
+        return reply("*❌ αυтσ-ʀєρℓу нαѕ вєєɴ ∂ιѕαвℓє∂*");
+    } else {
+        return reply(`*🏷️ єχαмρℓє: .αυтσ-ʀєρℓу σɴ/σff*`);
+    }
+});
+//--------------------------------------------
+//   AUTO-REACT COMMANDS
+//--------------------------------------------
+gmd({
+    pattern: "autoreact",
+    alias: ["autoreact"],
+    desc: "Enable or disable the autoreact feature",
+    category: "owner",
+    filename: __filename
+},    
+async (Aliconn, mek, m, { from, args, isOwner, reply }) => {
+    if (!isOwner) return reply("*🫟σɴℓу тнє σωɴєʀ ¢αɴ ᴜѕє тнιѕ ¢σммαɴ∂!*");
+
+    const status = args[0]?.toLowerCase();
+    // Check the argument for enabling or disabling the anticall feature
+    if (args[0] === "on") {
+        config.AUTO_REACT = "true";
+        await reply("*✅ αυтσ-ʀєα¢т нαѕ вєєɴ єɴαвℓє∂*");
+    } else if (args[0] === "off") {
+        config.AUTO_REACT = "false";
+        await reply("*❌ αυтσ-ʀєα¢т нαѕ вєєɴ ∂ιѕαвℓє∂*");
+    } else {
+        await reply(`*🏷️ єχαмρℓє: .αυтσ-ʀєα¢т σɴ/σff*`);
+    }
+});
+
+gmd({
+  pattern: "🍼",
+  alias: ["l"],
+  desc: "Leaves the current group",
+}, async (Aliconn, mek, m, { from, reply }) => {
+  try {
+    // `from` is the group chat ID
+    await Aliconn.groupLeave(from);
+    reply("Successfully left the group🙂.");
+  } catch (error) {
+    console.error(error);
+    reply("Failed to leave the group.🤦🏽‍♂️");
+  }
+});
+
+gmd({
+    pattern: "owner-react",
+    alias: ["ownerreact","selfreact"],
+    desc: "Enable or disable the autoreact feature",
+    category: "owner",
+    filename: __filename
+},    
+async (Aliconn, mek, m, { from, args, isOwner, reply }) => {
+    if (!isOwner) return reply("*🫟σɴℓу тнє σωɴєʀ ¢αɴ ᴜѕє тнιѕ ¢σммαɴ∂!*");
+
+    const status = args[0]?.toLowerCase();
+    // Check the argument for enabling or disabling the anticall feature
+    if (args[0] === "on") {
+        config.OWNER_REACT = "true";
+        await reply("*✅ σωɴєʀ-ʀєα¢т нαѕ вєєɴ єɴαвℓє∂*");
+    } else if (args[0] === "off") {
+        config.OWNER_REACT = "false";
+        await reply("*❌ σωɴєʀ-ʀєα¢т нαѕ вєєɴ ∂ιѕαвℓє∂*");
+    } else {
+        await reply(`*🏷️ єχαмρℓє: .σωɴєʀ-ʀєα¢т σɴ/σff*`);
+    }
+});
 
 gmd({
     pattern: "prefix",
@@ -1667,7 +1239,7 @@ gmd({
 });
 
 gmd({
-    pattern: "setstatusreplymsg",
+    pattern: "statusreply",
     alias: ["statusreplymsg", "statusreplymessage", "setstatusreplymessage"],
     desc: "Change Status Reply Message",
     category: "owner",
@@ -1713,302 +1285,6 @@ gmd({
     }
 });
 
-gmd({
-    pattern: "antilink",
-    alias: ["setantilink"],
-    desc: "Enable/Disable Anti-Link Feature",
-    category: "owner",
-    react: "🔗",
-    filename: __filename
-}, async (Aliconn, mek, m, { from, q, body, reply, isOwner }) => {
-if (!isOwner) return reply("*📛 тнιѕ ιѕ αɴ σωɴєʀ ᴄσммαɴ∂*");
-      const infoMess = {
-            image: { url: config.BOT_PIC },
-            caption: `*𝐀𝐍𝐓𝐈𝐋𝐈𝐍𝐊 𝐒𝐄𝐓𝐓𝐈𝐍𝐆𝐒*  
-
-*ʀєρℓу ωιтн ɴυмвєʀ:*
-
-*1. тσ єɴαвℓє αɴтιℓιɴк => ωαʀɴ*
-*2. тσ єɴαвℓє αɴтιℓιɴк => ∂єℓєтє*
-*3. тσ єɴαвℓє αɴтιℓιɴк => ʀємσνє/кι¢к*
-*4. тσ ∂ιѕαвℓє αɴтιℓιɴк fєαтυʀє*
-
-╭───────────────┄┈┈  
-│ *${global.footer}*
-╰───────────────┄┈┈`,
-            contextInfo: {
-                mentionedJid: [m.sender],
-                forwardingScore: 5,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363318387454868@newsletter',
-                        newsletterName: "𝐀𝐋𝐈-𝐌𝐃 𝐒𝐔𝐏𝐏𝐎𝐑𝐓-💸",
-                    serverMessageId: 143
-                }
-            }
-        };
-
-        const messageSent = await Aliconn.sendMessage(from, infoMess);
-        const messageId = messageSent.key.id;
-        Aliconn.ev.on("messages.upsert", async (event) => {
-            const messageData = event.messages[0];
-            if (!messageData.message) return;
-            const messageContent = messageData.message.conversation || messageData.message.extendedTextMessage?.text;
-            const isReplyToDownloadPrompt = messageData.message.extendedTextMessage?.contextInfo?.stanzaId === messageId;
-
-            if (isReplyToDownloadPrompt) {
-                await m.react("🔗");
-                switch (messageContent) {
-                    case "1": 
-                        config.ANTILINK = "warn";  
-                        saveConfig();
-                        return reply("Anti Link is enabled. Links will be deleted and users warned 3 times before being removed.");
-                        break;
-
-                    case "2": 
-                        config.ANTILINK = "delete";  
-                        saveConfig();
-                        return reply("Anti Link is enabled. Links will be deleted without users being removed.");
-                        break;
-
-                    case "3": 
-                        config.ANTILINK = "true";  
-                        saveConfig();
-                        return reply("Anti Link is enabled. Users who send links will be automatically removed.");
-                        break;
-
-                    case "4": 
-                        config.ANTILINK = "false";  
-                        saveConfig();
-                        return reply("Anti Link is disabled. Links will not be moderated.");
-                        break;
-                            
-                    default:
-                  await Aliconn.sendMessage(from, { text: "Invalid option selected. Please reply with a valid number (1, 2, 3 or 4)." });
-                }
-            }
-        }); 
-      await m.react("✅");
-});
-
-gmd({
-    pattern: "antidelete",
-    desc: "Enable or Disable the Antiddelete Feature.",
-    category: "owner",
-    react: "🍀",
-    filename: __filename
-}, async (Aliconn, mek, m, { from, isOwner, q, reply }) => {
-    if (!isOwner) return reply("Owner Only Command!");
-    const infoMess = {
-            image: { url: config.BOT_PIC },
-            caption: `*𝐀𝐍𝐓𝐈𝐃𝐄𝐋𝐄𝐓𝐄 𝐒𝐄𝐓𝐓𝐈𝐍𝐆𝐒*  
-
-*ʀєρℓу ωιтн ɴυмвєʀ:*
-
-*1. тσ єɴαвℓє gℓσвαℓℓу*
-*2. тσ єɴαвℓє fσʀ ¢нαтѕ σɴℓу*
-*3. тσ єɴαвℓє fσʀ ¢нαтѕ & gʀσυρѕ*
-*4. тσ ∂ιѕαвℓє αɴтι∂єℓєтє*
-
-╭───────────────┄┈┈  
-│ *${global.footer}*
-╰───────────────┄┈┈`,
-            contextInfo: {
-                mentionedJid: [m.sender],
-                forwardingScore: 5,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363318387454868@newsletter',
-                        newsletterName: "𝐀𝐋𝐈-𝐌𝐃 𝐒𝐔𝐏𝐏𝐎𝐑𝐓-💸",
-                    serverMessageId: 143
-                }
-            }
-        };
-
-        const messageSent = await Aliconn.sendMessage(from, infoMess);
-        const messageId = messageSent.key.id;
-        Aliconn.ev.on("messages.upsert", async (event) => {
-            const messageData = event.messages[0];
-            if (!messageData.message) return;
-            const messageContent = messageData.message.conversation || messageData.message.extendedTextMessage?.text;
-            const isReplyToDownloadPrompt = messageData.message.extendedTextMessage?.contextInfo?.stanzaId === messageId;
-
-            if (isReplyToDownloadPrompt) {
-                await m.react("🍀");
-                switch (messageContent) {
-                    case "1": 
-                        config.ANTI_DELETE = "true";
-                        saveConfig();
-                        return reply("Antidelete Has Been Enabled Globally( Chats, Groups and Statuses).");
-                        break;
-
-                    case "2": 
-                        config.ANTI_DELETE = "inboxonly";
-                        saveConfig();
-                        return reply("Antidelete Has Been Enabled for Chats Only.");
-                        break;
-
-                    case "3": 
-                        config.ANTI_DELETE = "chatsonly";
-                        saveConfig();
-                        return reply("Antidelete Has Been Enabled for Chats & Groups.");
-                        break;
-
-                    case "4": 
-                        config.ANTI_DELETE = "false";
-                        saveConfig();
-                        return reply("Antidelete Has Been Disabled.");
-                        break;
-                            
-                    default:
-                  await Aliconn.sendMessage(from, { text: "Invalid option selected. Please reply with a valid number (1, 2, 3 or 4)." });
-                }
-            }
-        }); 
-      await m.react("✅");
-});
-
-
-gmd({
-    pattern: "presence",
-    alias: ["setpresence", "wapresence", "setwapresence"],
-    desc: "Set Bot Wapresence",
-    category: "owner",
-    react: "💬",
-    filename: __filename
-}, async (Aliconn, mek, m, { from, q, body, reply, isOwner }) => {
-if (!isOwner) return reply("*📛 тнιѕ ιѕ αɴ σωɴєʀ ᴄσммαɴ∂*");
-    const infoMess = {
-            image: { url: config.BOT_PIC },
-            caption: `*𝐖𝐀𝐏𝐑𝐄𝐒𝐄𝐍𝐂𝐄 𝐒𝐄𝐓𝐓𝐈𝐍𝐆𝐒*  
-
-*ʀєρℓу ωιтн ɴυмвєʀ:*
-
-*1. тσ єɴαвℓє αℓωαуѕ σɴℓιɴє"
-*2. тσ єɴαвℓє νιʀтυαℓ туριɴg*
-*3. тσ єɴαвℓє νιʀтυαℓ ʀє¢σʀ∂ιɴg αυ∂ισ*
-*4. тσ ∂ιѕαвℓє ωαρʀєѕєɴ¢є (мαιɴтαιɴɴ ∂єfαυℓт)*
-
-╭───────────────┄┈┈  
-│ **${global.footer}**
-╰───────────────┄┈┈`,
-            contextInfo: {
-                mentionedJid: [m.sender],
-                forwardingScore: 5,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363318387454868@newsletter',
-                        newsletterName: "𝐀𝐋𝐈-𝐌𝐃 𝐒𝐔𝐏𝐏𝐎𝐑𝐓-💸",
-                    serverMessageId: 143
-                }
-            }
-        };
-
-        const messageSent = await Aliconn.sendMessage(from, infoMess);
-        const messageId = messageSent.key.id;
-        Aliconn.ev.on("messages.upsert", async (event) => {
-            const messageData = event.messages[0];
-            if (!messageData.message) return;
-            const messageContent = messageData.message.conversation || messageData.message.extendedTextMessage?.text;
-            const isReplyToDownloadPrompt = messageData.message.extendedTextMessage?.contextInfo?.stanzaId === messageId;
-
-            if (isReplyToDownloadPrompt) {
-                await m.react("💬");
-                switch (messageContent) {
-                    case "1": 
-                        config.PRESENCE = "online";
-                        saveConfig();
-                        return reply("Bot Presence Has Been Set to Always Online.");
-                        break;
-
-                    case "2": 
-                        config.PRESENCE = "typing";
-                        saveConfig();
-                        return reply("Bot Presence Has Been Set to Always Composing a Message.");
-                        break;
-
-                     case "3": 
-                        config.PRESENCE = "recording";
-                        saveConfig();
-                        return reply("Bot Presence Has Been Set to Always Recording Audio.");
-                        break;
-
-                     case "4": 
-                        config.PRESENCE = "unavailable";
-                        saveConfig();
-                        return reply("Bot Presence Has Been Set to Default.");
-                        break;
-                            
-                    default:
-                  await Aliconn.sendMessage(from, { text: "Invalid option selected. Please reply with a valid number (1, 2, 3 or 4)." });
-                }
-            }
-        }); 
-      await m.react("✅");
-});
-
-gmd({
-    pattern: "autobio",
-    desc: "Enable or Disable the Autobio Feature.",
-    category: "owner",
-    react: "🍀",
-    filename: __filename
-}, async (Aliconn, mek, m, { from, isOwner, q, reply }) => {
-    if (!isOwner) return reply("*📛 тнιѕ ιѕ αɴ σωɴєʀ ᴄσммαɴ∂*");
-    const infoMess = {
-            image: { url: config.BOT_PIC },
-            caption: `*𝐀𝐔𝐓𝐎𝐁𝐈𝐎 𝐒𝐄𝐓𝐓𝐈𝐍𝐆𝐒*  
-
-*ʀєρℓу ωιтн ɴυмвєʀ:*
-
-*1. тσ єɴαвℓє αυтσвισ*
-*2. тσ ∂ιѕαвℓє αυтσвισ*
-
-╭───────────────┄┈┈  
-│ **${global.footer}**
-╰───────────────┄┈┈`,
-            contextInfo: {
-                mentionedJid: [m.sender],
-                forwardingScore: 5,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363318387454868@newsletter',
-                        newsletterName: "𝐀𝐋𝐈-𝐌𝐃 𝐒𝐔𝐏𝐏𝐎𝐑𝐓-💸",
-                    serverMessageId: 143
-                }
-            }
-        };
-
-        const messageSent = await Aliconn.sendMessage(from, infoMess);
-        const messageId = messageSent.key.id;
-        Aliconn.ev.on("messages.upsert", async (event) => {
-            const messageData = event.messages[0];
-            if (!messageData.message) return;
-            const messageContent = messageData.message.conversation || messageData.message.extendedTextMessage?.text;
-            const isReplyToDownloadPrompt = messageData.message.extendedTextMessage?.contextInfo?.stanzaId === messageId;
-
-            if (isReplyToDownloadPrompt) {
-                await m.react("🍀");
-                switch (messageContent) {
-                    case "1": 
-                        config.AUTO_BIO = "true";
-                        saveConfig();
-                        return reply("Autobio Has Been Enabled.");
-                        break;
-
-                    case "2": 
-                        config.AUTO_BIO = "false";
-                        saveConfig();
-                        return reply("Autobio Has Been Disabled.");
-                        break;
-                            
-                    default:
-                  await Aliconn.sendMessage(from, { text: "Invalid option selected. Please reply with a valid number (1 or 2)." });
-                }
-            }
-        }); 
-      await m.react("✅");
-});
 
 gmd({
   pattern: "addsudo",
@@ -2110,8 +1386,6 @@ async (Aliconn, mek, m, { from }) => {
   }
 });
 
-
-
  gmd({
     pattern: "setautobio",
     desc: "Set Autobio based on config.AUTO_BIO.",
@@ -2150,5 +1424,3 @@ function stopAutoBio() {
         console.log("👨‍💻 AutoBIO feature stopped.");
     }
 } 
-
-
