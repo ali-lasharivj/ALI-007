@@ -64,6 +64,38 @@ function formatUptime(seconds) {
         const uptime = formatUptime(process.uptime());
 
 gmd({
+    pattern: "mod",
+    react: "🫟",
+    desc: "Set bot mode to private or public.",
+    category: "owner",
+    filename: __filename,
+}, async (Aliconn, mek, m, { from, args, isCreator, reply }) => {
+    if (!isCreator) return reply("*🫟σɴℓу тнє σωɴєʀ ¢αɴ ᴜѕє тнιѕ ¢σммαɴ∂!*");
+
+    // Si aucun argument n'est fourni, afficher le mode actuel et l'usage
+    if (!args[0]) {
+        return reply(`*🏷️ єχαмρℓє: мσ∂є ρυвℓι¢/ρʀιναтє*`);
+    }
+
+    const modeArg = args[0].toLowerCase();
+
+    if (modeArg === "private") {
+        config.MODE = "private";
+        return reply("*🛰️ вσт мσ∂є ιѕ ɴσω ѕєт тσ ρʀιναтє*");
+    } else if (modeArg === "public") {
+        config.MODE = "public";
+        return reply("*✅ вσт мσ∂є ιѕ ɴσω ѕєт тσ ρυвℓι¢*")
+        const {exec} = require("child_process")
+reply("*_RESTARTING NOW...🚀_*")
+await sleep(1500)
+exec("pm2 restart all")
+reply("*_ALI-MD STARTED NOW...🚀_*");
+    } else {
+        return reply("*🏷️ єχαмρℓє: мσ∂є ρυвℓι¢/ρʀιναтє*");
+    }
+});
+
+gmd({
     pattern: "broadcast",
     desc: "Broadcast a Message to All Groups.",
     category: "owner",
