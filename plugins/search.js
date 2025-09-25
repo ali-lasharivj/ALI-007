@@ -64,7 +64,7 @@ function formatNumber(number) {
 
 
 gmd({
-  pattern: "test2",
+  pattern: "test",
   desc: "Check if Bot is Active.",
   react: "🖼️",
   category: "general",
@@ -149,7 +149,7 @@ gmd({
 });
 
 gmd({
-    pattern: "img",
+    pattern: "img2",
     alias: ["image", "gimage", "googleimage"],
     desc: "Search for Images from Google.",
     react: "🖼️",
@@ -176,7 +176,7 @@ gmd({
 });
 
 gmd({
-    pattern: "img2",
+    pattern: "img",
     alias: ["image2", "gimage2", "googleimage2"],
     desc: "Search for Images from Google.",
     react: "🖼️",
