@@ -69,8 +69,8 @@ gmd({
     desc: "Set bot mode to private or public.",
     category: "owner",
     filename: __filename,
-}, async (Aliconn, mek, m, { from, args, isCreator, reply }) => {
-    if (!isCreator) return reply("*🫟σɴℓу тнє σωɴєʀ ¢αɴ ᴜѕє тнιѕ ¢σммαɴ∂!*");
+}, async (Aliconn, mek, m, { from, args, isOwner, reply }) => {
+    if (!isOwner) return reply("*🫟σɴℓу тнє σωɴєʀ ¢αɴ ᴜѕє тнιѕ ¢σммαɴ∂!*");
 
     // Si aucun argument n'est fourni, afficher le mode actuel et l'usage
     if (!args[0]) {
