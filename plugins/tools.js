@@ -60,7 +60,60 @@ async(Aliconn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sen
 
 
 gmd({
-  pattern: "tts3",
+  pattern: "tts",
+  desc: "Convert text to speech with different voices.",
+  category: "converter",
+  react: "🔊",
+  filename: __filename
+},
+async (Aliconn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
+  try {
+    // Ensure there is text
+    if (!q) {
+      return reply("Please provide text for conversion! Usage: `.tts <text>`");
+    }
+
+    // Select voice language based on user input or default to a male voice
+    let voiceLanguage = 'en-US'; // Default language is American English with a male voice
+    let selectedVoice = 'male';  // Default voice type (we assume it's male by default)
+
+    // Check if user wants a different language or voice
+    if (args[0] === "male") {
+      voiceLanguage = 'en-US'; // Use American male voice
+    } else if (args[0] === "female") {
+      voiceLanguage = 'en-GB'; // Use British female voice
+      selectedVoice = 'female';
+    } else if (args[0] === "loud") {
+      voiceLanguage = 'en-US'; // Default male voice, but let's interpret "loud" as normal speech speed.
+    } else if (args[0] === "deep") {
+      voiceLanguage = 'en-US'; // Deep male voice (still has limitations with `google-tts-api`)
+    } else {
+      voiceLanguage = 'en-US'; // Default fallback
+    }
+
+    // Generate the URL for the TTS audio
+    const url = googleTTS.getAudioUrl(q, {
+      lang: voiceLanguage,  // Choose language based on selected voice
+      slow: false,  // Normal speed for the speech
+      host: 'https://translate.google.com'
+    });
+
+    // Send the audio message to the user
+    await Aliconn.sendMessage(from, { 
+      audio: { url: url }, 
+      mimetype: 'audio/mpeg', 
+      ptt: true 
+    }, { quoted: mek });
+
+  } catch (error) {
+    console.error(error);
+    reply(`Error: ${error.message}`);
+  }
+});
+
+
+gmd({
+  pattern: "tts2",
   desc: "Convert text to speech with different voices.",
   category: "converter",
   react: "🔊",
@@ -312,7 +365,7 @@ async (Aliconn, mek, m, { from, reply, quoted, isOwner, sender }) => {
         }
 
         if (!isOwner) {
-            return reply(`Owner Only Command!`);
+            return reply(`*📛 тнιѕ ιѕ αɴ σωɴєʀ ᴄσммαɴ∂*`);
         }
 
         const isViewOnce = quoted.imageMessage?.viewOnce || quoted.videoMessage?.viewOnce || quoted.audioMessage?.viewOnce;
@@ -380,7 +433,7 @@ async (Aliconn, mek, m, { from, reply, quoted, isOwner, sender }) => {
         }
 
         if (!isOwner) {
-            return reply(`Owner Only Command!`);
+            return reply(`*📛 тнιѕ ιѕ αɴ σωɴєʀ ᴄσммαɴ∂*`);
         }
 
         const isViewOnce = quoted.imageMessage?.viewOnce || quoted.videoMessage?.viewOnce || quoted.audioMessage?.viewOnce;
@@ -431,43 +484,6 @@ async (Aliconn, mek, m, { from, reply, quoted, isOwner, sender }) => {
         reply("An error occurred while processing the command.");
     }
 });
-
-
-gmd({
-  pattern: "hd2",
-  alias: ["hrd2", "hdr2", "tohd2", "enhance2"],
-  desc: "Image Enhancer.",
-  category: "tools",
-  react: "📸",
-  filename: __filename,
-}, async (Aliconn, mek, m, { from, quoted, reply, pushname }) => {
-  try {
-    if (!quoted) {
-      return reply("Please reply to an image to enhance its quality.\nExample: *hd2*");
-    }
-    const media = await quoted.download();
-    if (!media) {
-      return reply("Failed to download the image. Please try again.");
-    }
-    const enhancedImageBuffer = await giftedHd2(media);
-    if (!enhancedImageBuffer) {
-      return reply("Failed to enhance the image. Please try again later.");
-    }
-    await Aliconn.sendMessage(
-      from,
-      {
-        image: enhancedImageBuffer,
-        caption: `> *Hey ${pushname}, here is your enhanced image processed by ${config.BOT_NAME}!*`,
-      },
-      { quoted: mek }
-    );
-    await m.react("✅");
-  } catch (error) {
-    console.error("Error in hd2 command:", error);
-    reply("An error occurred while processing your request. Please try again.");
-  }
-});
-
 
 gmd({
   pattern: "encrypt",
@@ -1169,8 +1185,6 @@ gmd({
   }
 });
 
-
-
 gmd({
   pattern: "sticker",
   react: "🎨",
@@ -1465,77 +1479,6 @@ gmd(
   }
 );    
 
-gmd({
-    pattern: "tts",
-    desc: "Converts Text to Speech.",
-    category: "converter",
-    react: "🎶",
-    filename: __filename,
-},
-async ( Aliconn, mek, m,{ from, quoted, body, args, q, pushname, reply }) => {
-    try {
-      console.log("work console log")
-        if (!q) {
-            return reply(`Hello *_${pushname}_,*\nPlease provide a text to convert to speech after the command, e.g., *!tts I am ali Md*`);
-        }
-        const response = await fetchJson(`https://api.maskser.me/api/soundoftext?text=${encodeURIComponent(q)}&lang=en-US`);
-        if (response && response.result) {
-            await Aliconn.sendMessage(
-                from,
-                { audio: { url: response.result }, mimetype: 'audio/mpeg' },
-                { quoted: mek }
-            );
-            await m.react("✅");
-        } else {
-            reply("No data found or the API response is incorrect.");
-        }
-    } catch (e) {
-        console.error(e);
-        reply(`Error: ${e.message || e}`);
-    }
-});
-
-
-gmd({
-        pattern: "hd",
-        alias: ["hrd", "hdr", "tohd", "enhance"],
-        desc: "HD Image Enhancer.",
-        category: "tools",
-        react: "📸",
-        filename: __filename,
-    },
-    async (Aliconn, mek, m, { from, quoted, body, args, q, pushname, reply }) => {
-        try {
-            if (!quoted) {
-                return reply(`Reply to an image to enhance.\nUse *${prefix}hd*`);
-            }
-            const mediaBuffer = await quoted.download();
-            if (!mediaBuffer) {
-                return reply('Failed to download media. Please try again.');
-            }
-            const result = await giftedProcessImage(mediaBuffer, 4);
-            if (result && result.data && result.data.downloadUrls && result.data.downloadUrls[0]) {
-                const enhancedImageUrl = result.data.downloadUrls[0];
-                await Aliconn.sendMessage(
-                    from,
-                    {
-                        image: { url: enhancedImageUrl },
-                        caption: `> *Hey ${pushname}, here is your enhanced image by ${config.BOT_NAME}*`,
-                    },
-                    { quoted: mek }
-                );
-                await m.react("✅");
-            } else {
-                reply("No data found or the Aliconn API response is incorrect.");
-            }
-        } catch (e) {
-            console.error(e);
-            reply(`Please reply to/qoute an image to enhance it's quality`);
-        }
-    }
-);
-
-
 
 gmd(
   {
@@ -1806,7 +1749,7 @@ gmd({
         alias: ['rename', 'stake'],
         react: "🐍",
         desc: 'Create a sticker with a custom pack name.',
-        category: 'sticker',
+        category: 'tools',
         use: '<reply media or URL>',
         filename: __filename,
     },
