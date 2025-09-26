@@ -69,6 +69,7 @@ const {
         saveMessage } = require('./data');
 const {
       GiftedAnticall,
+      AliconnAntidelete,
       GroupUpdate,
       getGroupAdmins,
       getRandom,
@@ -227,14 +228,13 @@ console.log('ALI MD IS ACTIVE [✅]')
 })
 Aliconn.ev.on('creds.update', saveCreds); 
 
-      Aliconn.ev.on('messages.update', async updates => {
-    for (const update of updates) {
-      if (update.update.message === null) {
-        console.log("Delete Detected:", JSON.stringify(update, null, 2));
-        await AntiDelete(Aliconn, updates);
-      }
-    }
-  });
+      Aliconn.ev.on("messages.update", async (updates) => {
+  try {
+    await AliconnAntidelete(updates, Aliconn);
+  } catch (err) {
+    console.error("❌ Error in antidelete handler:", err);
+  }
+});
       
 Aliconn.ev.on("call", async (json) => {
   await GiftedAnticall(json, Aliconn);
