@@ -66,7 +66,7 @@ const {
       commands,
       giftedmd,
       eventlogger, 
-      loadSession,
+      loadBase64Session,
     getSudoNumbers,
       downloadMediaMessage
     } = require("./lib");
@@ -109,7 +109,7 @@ function formatBytes(bytes) {
 }
 
 async function ConnectAliconnToWA() {
-  await loadSession();
+  await loadBase64Session();
   eventlogger()
 console.log('CONNETING ALI MD [⏱️]');
 const { state, saveCreds } = await useMultiFileAuthState(__dirname + '/session/');
