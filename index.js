@@ -50,6 +50,8 @@ const {
       OWNER_NUMBER: ownerNumber,
       SUDO_NUMBERS } = config;
     const sudoNumbers = SUDO_NUMBERS && SUDO_NUMBERS.trim() ? SUDO_NUMBERS : "No Sudos set";
+
+  
 const {
       GiftedAnticall,
       AliconnAntidelete,
