@@ -29,7 +29,7 @@ AUTO_REPLY: process.env.AUTO_REPLY || "false",
 ANTIBAD: process.env.ANTIBAD || "false",
 BAD_WORDS: process.env.BAD_WORDS || "fuck, pussy, anus, idiot", // Add Yours Separated by Comma(will be deleted if ANTIBAD is set to true)
 ANTICALL_MSG: process.env.ANTICALL_MSG || "*📞 ᴄαℓℓ ɴσт αℓℓσωє∂ ιɴ тнιѕ ɴᴜмвєʀ уσυ ∂σɴт нανє ᴘєʀмιѕѕισɴ 📵*",
-AUTO_R: process.env.AUTO_R || "false",
+AUTO_REACT: process.env.AUTO_R || "false",
 BOT_NAME: process.env.BOT_NAME || "𓆩ု᪳𝐀ɭīī 𝐌Ɗှ᪳𓆪", //  don't change 
 BOT_PIC: process.env.BOT_PIC || "https://files.catbox.moe/2ka956.jpg", //  don't change 
 AUTO_AUDIO: process.env.AUTO_AUDIO || "false",
