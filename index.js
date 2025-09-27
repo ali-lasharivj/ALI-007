@@ -147,10 +147,6 @@ async function loadBase64Session(base64Session) {
   }
 }
 
-// Usage Example:
-const config = {
-  SESSION_ID: "ALI~eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." // Your base64 session
-};
 
 if (config.SESSION_ID) {
   loadBase64Session(config.SESSION_ID).then(session => {
