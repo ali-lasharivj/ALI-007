@@ -122,7 +122,7 @@ if (!fs.existsSync(sessionDir)) {
 async function loadBase64Session(base64Session) {
   try {
     if (!base64Session.startsWith("ALI~")) {
-      throw new Error("Invalid format: Session must start with 'starcore~'");
+      throw new Error("Invalid format: Session must start with 'ALI~'");
     }
 
     const base64Data = base64Session.replace("ALI~", "");
