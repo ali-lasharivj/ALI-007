@@ -107,7 +107,59 @@ function formatBytes(bytes) {
     return bytes.toFixed(2) + ' bytes';
   }
 }
+// Session directory setup
+const sessionDir = path.join(__dirname, "./sessions");
+const credsPath = path.join(sessionDir, "creds.json");
 
+if (!fs.existsSync(sessionDir)) {
+  fs.mkdirSync(sessionDir, { recursive: true });
+}
+
+/**
+ * Decodes and saves a base64 session (starcore~ prefixed)
+ * @param {string} base64Session - Format: "starcore~BASE64_DATA"
+ */
+async function loadBase64Session(base64Session) {
+  try {
+    if (!base64Session.startsWith("ALI~")) {
+      throw new Error("Invalid format: Session must start with 'starcore~'");
+    }
+
+    const base64Data = base64Session.replace("ALI~", "");
+    
+    // Validate base64
+    if (!/^[A-Za-z0-9+/=]+$/.test(base64Data)) {
+      throw new Error("Invalid base64 characters detected");
+    }
+
+    // Decode and parse
+    const decodedData = Buffer.from(base64Data, "base64");
+    const sessionData = JSON.parse(decodedData.toString("utf-8"));
+
+    // Save to file
+    fs.writeFileSync(credsPath, decodedData);
+    console.log("✅ Session decoded and saved successfully");
+    return sessionData;
+
+  } catch (error) {
+    console.error("❌ Base64 session error:", error.message);
+    return null;
+  }
+}
+
+// Usage Example:
+const config = {
+  SESSION_ID: "ALI~eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." // Your base64 session
+};
+
+if (config.SESSION_ID) {
+  loadBase64Session(config.SESSION_ID).then(session => {
+    if (!session) {
+      console.log("🔄 Falling back to QR/pairing code");
+      // Initiate normal auth flow here
+    }
+  });
+}
 async function ConnectAliconnToWA() {
   await loadSession();
   eventlogger()
